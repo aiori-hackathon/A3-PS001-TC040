@@ -1,4 +1,7 @@
 # SENTIVRA
+TEAM INTRODUCTION: https://youtube.com/shorts/fAVnNkiJjwA?feature=share
+
+> **About this repository.** This is the team's **AIORI-3 hackathon submission** (problem statement PS001, team TC040): a snapshot of the SENTIVRA platform plus the submission materials ([Sentivra_Hackathon.pdf](Sentivra_Hackathon.pdf)) and the [research/](research/) evaluation environment. The primary SENTIVRA repository continues separately; nothing here depends on it at runtime.
 
 **One Security Layer. Every Threat.**
 
