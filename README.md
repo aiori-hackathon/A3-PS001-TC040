@@ -1,4 +1,14 @@
 # SENTIVRA
+
+<p align="center">
+  <img src="docs/screenshots/snapshot-cyber-defense-overview.png" alt="SENTIVRA Cyber Defense Command Center overview" width="49%" />
+  <img src="docs/screenshots/snapshot-cyber-defense-topology.png" alt="SENTIVRA security topology and scenario launcher" width="49%" />
+</p>
+<p align="center">
+  <img src="docs/screenshots/snapshot-cyber-defense-result.png" alt="SENTIVRA verified SQL injection simulation result" width="49%" />
+  <img src="docs/screenshots/snapshot-cyber-defense-evidence.png" alt="SENTIVRA detector evidence and execution timeline" width="49%" />
+</p>
+
 TEAM INTRODUCTION: https://youtube.com/shorts/fAVnNkiJjwA?feature=share
 
 > **About this repository.** This is the team's **AIORI-3 hackathon submission** (problem statement PS001, team TC040): a snapshot of the SENTIVRA platform plus the submission materials ([Sentivra_Hackathon.pdf](Sentivra_Hackathon.pdf)) and the [research/](research/) evaluation environment. The primary SENTIVRA repository continues separately; nothing here depends on it at runtime.
