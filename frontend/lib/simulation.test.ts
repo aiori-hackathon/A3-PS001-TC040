@@ -29,6 +29,7 @@ describe("simulation presentation rules", () => {
   });
 
   it("keeps detection and enforcement outcomes separate", () => {
+    expect(runOutcome(null).kind).toBe("idle");
     expect(runOutcome(run()).kind).toBe("block");
     expect(runOutcome(run({ enforcement_decision: "SIMULATED_ALLOW", detection_state: "NOT_DETECTED" })).kind).toBe("allow");
     expect(runOutcome(run({ status: "PARTIALLY_COMPLETED", enforcement_decision: "SIMULATED_UNAVAILABLE" })).kind).toBe("unavailable");

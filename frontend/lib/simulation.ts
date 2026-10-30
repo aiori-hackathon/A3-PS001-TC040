@@ -1,7 +1,7 @@
 import type { SimulationRun, SimulationScenario } from "@/types/api";
 
-export const SIMULATION_NOTICE = "SIMULATION ONLY. No real network traffic, system processes, or external applications were blocked.";
-export const HISTORY_PAGE_SIZE = 8;
+export const SIMULATION_NOTICE = "No real network traffic, system processes, or external applications are blocked.";
+export const HISTORY_PAGE_SIZE = 10;
 
 export function createRequestKey() {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
@@ -17,13 +17,13 @@ export type OutcomeKind = "idle" | "running" | "block" | "allow" | "review" | "u
 export type OutcomeTone = "neutral" | "cyan" | "violet" | "amber" | "red" | "green";
 
 const outcomes: Record<OutcomeKind, { label: string; tone: OutcomeTone; explanation: string }> = {
-  idle: { label: "Awaiting execution", tone: "neutral", explanation: "Select a trusted fixture to inspect the local detection pipeline." },
+  idle: { label: "READY", tone: "neutral", explanation: "Choose a trusted test scenario to start the attack theater." },
   running: { label: "Analysis in progress", tone: "cyan", explanation: "Waiting for the recorded result. No decision has been made." },
-  block: { label: "Simulated block", tone: "red", explanation: "The synthetic event stops at simulation enforcement. The resource is not reached." },
-  allow: { label: "Simulated allow", tone: "green", explanation: "The synthetic event reaches the conceptual resource. This is not a real-world safety guarantee." },
-  review: { label: "Review required", tone: "violet", explanation: "The decision is held for review. No allow or block is claimed." },
-  unavailable: { label: "Analysis unavailable", tone: "amber", explanation: "Local analysis is incomplete or unavailable. No successful allow or block is claimed." },
-  failed: { label: "Analysis failed", tone: "amber", explanation: "The execution failed. No successful allow or block is claimed." },
+  block: { label: "BLOCKED", tone: "red", explanation: "Sentivra detected a suspicious indicator and stopped the synthetic request at Policy." },
+  allow: { label: "ALLOWED", tone: "green", explanation: "The control request passed the available detector and reached the conceptual resource." },
+  review: { label: "REVIEW", tone: "amber", explanation: "The result needs review. No allow or block is claimed." },
+  unavailable: { label: "UNAVAILABLE", tone: "amber", explanation: "Analysis was incomplete or unavailable. No successful allow or block is claimed." },
+  failed: { label: "FAILED", tone: "amber", explanation: "The execution failed. No successful allow or block is claimed." },
 };
 
 export function runOutcome(run: SimulationRun | null) {
@@ -107,6 +107,22 @@ export function presentationStage(progress: number, kind: OutcomeKind) {
   if (kind === "review") return "REVIEW REQUIRED";
   if (kind === "failed") return "SIMULATION FAILED";
   return "ANALYSIS UNAVAILABLE";
+}
+
+export function shortId(value: string) {
+  return value.slice(0, 8);
+}
+
+export function relativeTime(value: string) {
+  const age = Date.now() - Date.parse(value);
+  if (!Number.isFinite(age)) return "Time unavailable";
+  const seconds = Math.max(0, Math.round(age / 1000));
+  if (seconds < 60) return "just now";
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.round(hours / 24)}d ago`;
 }
 
 export type SimulationTimelineEntry = { stage: string; timestamp: string };

@@ -35,11 +35,11 @@ export default function RulesPage() {
                 <TableBody>
                   {data.sigma.loaded.map((r) => (
                     <TableRow key={r.id}>
-                      <TableCell><span className="font-medium">{r.title}</span><span className="block font-mono text-xs text-muted-foreground">{r.path}</span></TableCell>
+                      <TableCell><span className="font-medium">{r.title}</span><span className="block font-mono text-[13px] text-muted-foreground">{r.path}</span></TableCell>
                       <TableCell>{humanize(r.level)}</TableCell>
                       <TableCell>{humanize(r.status)}</TableCell>
-                      <TableCell className="text-xs">{Object.entries(r.logsource).map(([k, v]) => `${k}: ${v}`).join(", ")}</TableCell>
-                      <TableCell className="font-mono text-xs">{r.tags.join(" ")}</TableCell>
+                      <TableCell className="text-[13px]">{Object.entries(r.logsource).map(([k, v]) => `${k}: ${v}`).join(", ")}</TableCell>
+                      <TableCell className="font-mono text-[13px]">{r.tags.join(" ")}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -58,9 +58,9 @@ export default function RulesPage() {
               <CardContent className="space-y-3 text-sm">
                 {data.custom.map((c) => (
                   <div key={c.file} className="rounded-lg border p-3">
-                    <p className="font-mono text-xs">{c.file}</p>
+                    <p className="font-mono text-[13px]">{c.file}</p>
                     <p className="text-muted-foreground">Used by {c.used_by}</p>
-                    {c.error ? <p className="text-destructive">{c.error}</p> : <p className="mt-1 text-xs text-muted-foreground">{c.rules?.length ?? 0} rules</p>}
+                    {c.error ? <p className="text-destructive">{c.error}</p> : <p className="mt-1 text-[13px] text-muted-foreground">{c.rules?.length ?? 0} rules</p>}
                   </div>
                 ))}
               </CardContent>
@@ -68,7 +68,7 @@ export default function RulesPage() {
             <Card>
               <CardHeader><CardTitle>YARA</CardTitle><CardDescription>Rule files compiled by YaraDetector</CardDescription></CardHeader>
               <CardContent className="space-y-1 text-sm">
-                {data.yara.files.map((f) => <p key={f} className="font-mono text-xs">detection-rules/yara/{f}</p>)}
+                {data.yara.files.map((f) => <p key={f} className="font-mono text-[13px]">detection-rules/yara/{f}</p>)}
               </CardContent>
             </Card>
           </div>

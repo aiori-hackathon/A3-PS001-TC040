@@ -40,7 +40,7 @@ function NetworkDetails({ result }: { result: NetworkAnalysisResponse }) {
                 ))}
               </TableBody>
             </Table>
-            <p className="mt-3 text-xs text-muted-foreground">
+            <p className="mt-3 text-[13px] text-muted-foreground">
               A flow counts as model-flagged when at least two layers agree (fusion cut {n.fusion_cut.toFixed(3)}, chosen on
               calibration data). {n.model_flag_significance.summary}.
             </p>
@@ -55,9 +55,9 @@ function NetworkDetails({ result }: { result: NetworkAnalysisResponse }) {
             {n.behavior_findings.length === 0 ? <p className="text-sm text-muted-foreground">No behavior rule fired.</p> : null}
             {n.behavior_findings.map((f, i) => (
               <div key={`${f.rule}-${i}`} className="space-y-1.5 rounded-lg border p-3 text-sm">
-                <p className="font-medium">{humanize(f.rule)} <span className="font-mono text-xs text-muted-foreground">{f.subject}</span></p>
+                <p className="font-medium">{humanize(f.rule)} <span className="font-mono text-[13px] text-muted-foreground">{f.subject}</span></p>
                 <p className="text-muted-foreground">{f.description}</p>
-                <p className="font-mono text-xs text-muted-foreground">
+                <p className="font-mono text-[13px] text-muted-foreground">
                   {Object.entries(f.details).map(([k, v]) => `${k}=${String(v)}`).join("  ")}
                 </p>
                 <MitreList mappings={f.mitre_attack} />
@@ -86,13 +86,13 @@ function NetworkDetails({ result }: { result: NetworkAnalysisResponse }) {
               <TableBody>
                 {n.flagged_flows.slice(0, 20).map((v, i) => (
                   <TableRow key={i}>
-                    <TableCell className="font-mono text-xs whitespace-nowrap">
+                    <TableCell className="font-mono text-[13px] whitespace-nowrap">
                       {String(v.flow.src_ip)}:{String(v.flow.src_port)} → {String(v.flow.dst_ip)}:{String(v.flow.dst_port)}/{String(v.flow.protocol)}
                     </TableCell>
                     <TableCell className="text-right tabular">{v.fused_score.toFixed(2)}</TableCell>
-                    <TableCell className="text-xs">{[...v.fired_layers, ...v.behavior_rules.map((r) => `rule:${r}`)].join(", ")}</TableCell>
-                    <TableCell className="max-w-md text-xs text-muted-foreground">{v.explanations[0] ?? "Covered by a behavior rule"}</TableCell>
-                    <TableCell className="text-xs">{v.ground_truth_label ?? "—"}</TableCell>
+                    <TableCell className="text-[13px]">{[...v.fired_layers, ...v.behavior_rules.map((r) => `rule:${r}`)].join(", ")}</TableCell>
+                    <TableCell className="max-w-md text-[13px] text-muted-foreground">{v.explanations[0] ?? "Covered by a behavior rule"}</TableCell>
+                    <TableCell className="text-[13px]">{v.ground_truth_label ?? "—"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -119,7 +119,7 @@ export default function NetworkPage() {
           </>
         }
       />
-      <p className="text-xs text-muted-foreground">
+      <p className="text-[13px] text-muted-foreground">
         Suricata and Zeek aren&apos;t integrated in this build (nothing reads their logs yet), so results come from Sentivra&apos;s own rules and models only.
         Uploaded traffic is parsed in memory and discarded after the request.
       </p>

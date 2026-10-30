@@ -2,17 +2,19 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import type { ReactNode } from "react";
+import { ShieldAlert, ShieldCheck } from "lucide-react";
 
 import { ChartCard } from "@/components/charts/chart-card";
-import { CategoryBars, SeverityBars, TimelineColumns } from "@/components/charts/charts";
+import { TimelineColumns } from "@/components/charts/charts";
 import { AlertsTable } from "@/components/sentivra/alerts-table";
 import { SourceTypeBadge } from "@/components/sentivra/badges";
 import { EmptyState, ErrorState, LoadingBlock, PageHeader } from "@/components/sentivra/states";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useApi } from "@/hooks/use-api";
-import { classificationLabel, detectorLabel, humanize, integer } from "@/lib/format";
+import { integer } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { SEVERITIES, type AlertListItem, type Health, type Metrics, type SourceType } from "@/types/api";
+import { type AlertListItem, type Health, type Metrics, type SourceType } from "@/types/api";
 
 const WINDOWS = [
   { hours: 24, label: "Last 24 hours" },
@@ -30,13 +32,13 @@ function bucketLabel(start: string, index: number, bucket: "hour" | "day") {
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-function StatTile({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function StatTile({ label, value, hint }: { label: string; value: string; hint?: ReactNode }) {
   return (
     <Card size="sm">
       <CardContent className="space-y-1">
         <p className="text-sm text-muted-foreground">{label}</p>
         <p className="text-2xl font-semibold">{value}</p>
-        {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+        {hint ? <p className="text-[13px] text-muted-foreground">{hint}</p> : null}
       </CardContent>
     </Card>
   );
@@ -65,10 +67,7 @@ export default function OverviewPage() {
 
   return (
     <>
-      <PageHeader
-        title="Overview"
-        description="Detections across every Sentivra layer. Counts are what the platform has seen; model accuracy lives on the Models page, tied to its evaluation data."
-      />
+      <PageHeader title="Overview" description="See what Sentivra has analyzed, what needs attention, and whether the detection layer is ready." />
 
       <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Time window">
         {WINDOWS.map((w) => (
@@ -92,25 +91,31 @@ export default function OverviewPage() {
 
       {m ? (
         <div className={cn("space-y-6 transition-opacity", metrics.isValidating && "opacity-70")}>
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,2fr)]">
-            <Card>
-              <CardHeader>
-                <CardTitle>Security score</CardTitle>
-                <CardDescription>From open alerts in the window</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <p className="text-6xl font-semibold tracking-tight">{m.security_score.value}</p>
-                <p className="text-xs text-muted-foreground">{m.security_score.formula}.</p>
-                <p className="text-xs text-muted-foreground">{m.security_score.note}</p>
-              </CardContent>
-            </Card>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-2">
-              <StatTile label="Open alerts" value={integer(m.window.open_alerts)} hint={`${integer(m.window.alerts)} raised in window`} />
-              <StatTile label="Open high or critical" value={integer(m.window.open_by_severity.HIGH + m.window.open_by_severity.CRITICAL)} />
-              <StatTile label="Events analyzed" value={integer(m.totals.events)} hint="all time" />
-              <StatTile label="Engines available" value={health.data ? `${available}/${engines.length}` : "…"} hint="see Integrations" />
-            </div>
+          <Card className="border-l-4 border-l-status-good">
+            <CardContent className="flex flex-wrap items-center justify-between gap-4 py-6">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Threat status · {WINDOWS.find((item) => item.hours === windowHours)?.label}</p>
+                <h2 className="mt-1 flex items-center gap-3 text-2xl font-semibold tracking-tight">{m.window.open_alerts ? <ShieldAlert className="size-8 text-status-critical" aria-hidden /> : <ShieldCheck className="size-8 text-status-good" aria-hidden />}{m.window.open_alerts ? `${integer(m.window.open_alerts)} threat${m.window.open_alerts === 1 ? "" : "s"} need attention` : "All clear in this window"}</h2>
+                <p className="mt-2 text-sm text-muted-foreground">{m.window.open_alerts ? "Review the open alerts below to understand the evidence." : "Sentivra has no open operational alerts in the selected period."}</p>
+              </div>
+              <Link href="/demo" className="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/80">Run a demo scenario</Link>
+            </CardContent>
+          </Card>
+          <div className="grid gap-4 md:grid-cols-3">
+            <StatTile label="Open alerts" value={integer(m.window.open_alerts)} hint={`${integer(m.window.alerts)} raised in window`} />
+            <StatTile label="Events analyzed" value={integer(m.totals.events)} hint="operational events, all time" />
+            <StatTile label="Detectors ready" value={health.data ? `${available} of ${engines.length}` : "…"} hint={<Link href="/integrations" className="underline underline-offset-4">See what is missing</Link>} />
           </div>
+
+          <Card>
+            <CardHeader><CardTitle>Security score</CardTitle><CardDescription>Available after Sentivra has analyzed at least one operational event.</CardDescription></CardHeader>
+            <CardContent className="flex items-center justify-between gap-4">
+              <p className="text-4xl font-semibold tracking-tight">{m.totals.events > 0 ? m.security_score.value : "No data yet"}</p>
+              <details className="max-w-md text-sm text-muted-foreground"><summary className="cursor-pointer font-medium text-foreground">How is this calculated?</summary><p className="mt-2">{m.security_score.formula}. {m.security_score.note}</p></details>
+            </CardContent>
+          </Card>
+
+          <p className="rounded-lg border border-dashed px-4 py-3 text-sm text-muted-foreground">Simulation executions are demonstrations and stay out of these operational incident totals. Open <Link href="/cyber-defense" className="font-medium text-foreground underline underline-offset-4">Cyber Defense Lab</Link> to inspect them separately.</p>
 
           <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
             <span>Alerts by input:</span>
@@ -128,44 +133,14 @@ export default function OverviewPage() {
             </EmptyState>
           ) : (
             <>
-              <div className="grid gap-4 lg:grid-cols-2">
-                <ChartCard
-                  title="Threat timeline"
-                  description={`Alerts per ${m.window.timeline.bucket}`}
-                  rows={m.window.timeline.counts.map((value, i) => ({ label: bucketLabel(m.window.timeline.start, i, m.window.timeline.bucket), value }))}
-                  valueLabel="Alerts"
-                >
-                  <TimelineColumns
-                    data={m.window.timeline.counts.map((value, i) => ({ label: bucketLabel(m.window.timeline.start, i, m.window.timeline.bucket), value }))}
-                  />
-                </ChartCard>
-                <ChartCard
-                  title="Severity distribution"
-                  description="Alerts raised in the window"
-                  rows={[...SEVERITIES].filter((s) => s !== "SAFE").reverse().map((s) => ({ label: humanize(s), value: m.window.by_severity[s] }))}
-                  valueLabel="Alerts"
-                >
-                  <SeverityBars counts={m.window.by_severity} />
-                </ChartCard>
-              </div>
-              <div className="grid gap-4 lg:grid-cols-2">
-                <ChartCard
-                  title="Detection sources"
-                  description="Alerts each detector contributed a finding to"
-                  rows={Object.entries(m.window.by_detector).map(([label, value]) => ({ label: detectorLabel(label), value }))}
-                  valueLabel="Alerts"
-                >
-                  <CategoryBars data={Object.entries(m.window.by_detector).map(([label, value]) => ({ label: detectorLabel(label), value }))} />
-                </ChartCard>
-                <ChartCard
-                  title="Top threat categories"
-                  description="Each alert's classification (its strongest finding's category)"
-                  rows={Object.entries(m.window.by_classification).map(([label, value]) => ({ label: classificationLabel(label), value }))}
-                  valueLabel="Alerts"
-                >
-                  <CategoryBars data={Object.entries(m.window.by_classification).map(([label, value]) => ({ label: classificationLabel(label), value }))} labelWidth={210} />
-                </ChartCard>
-              </div>
+              <ChartCard
+                title="Threats over time"
+                description={`Alerts per ${m.window.timeline.bucket}`}
+                rows={m.window.timeline.counts.map((value, i) => ({ label: bucketLabel(m.window.timeline.start, i, m.window.timeline.bucket), value }))}
+                valueLabel="Alerts"
+              >
+                <TimelineColumns data={m.window.timeline.counts.map((value, i) => ({ label: bucketLabel(m.window.timeline.start, i, m.window.timeline.bucket), value }))} />
+              </ChartCard>
             </>
           )}
 
@@ -176,7 +151,7 @@ export default function OverviewPage() {
                   <CardContent className="space-y-1">
                     <p className="text-sm text-muted-foreground">{d.label}</p>
                     <p className="text-2xl font-semibold">{integer(m.window.by_domain[d.domain] ?? 0)}</p>
-                    <p className="text-xs text-muted-foreground">implemented</p>
+                    <p className="text-[13px] text-muted-foreground">implemented</p>
                   </CardContent>
                 </Card>
               </Link>

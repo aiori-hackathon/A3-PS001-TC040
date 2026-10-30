@@ -30,7 +30,7 @@ function FileFacts({ result }: { result: FileAnalysisResponse }) {
           {rows.map((r) => (
             <div key={r.label} className="contents">
               <dt className="text-muted-foreground">{r.label}</dt>
-              <dd className="min-w-0 font-mono text-xs break-all sm:font-sans sm:text-sm">{r.value}</dd>
+              <dd className="min-w-0 font-mono text-[13px] break-all sm:font-sans sm:text-sm">{r.value}</dd>
             </div>
           ))}
         </dl>
@@ -54,7 +54,7 @@ export default function FilesPage() {
           </>
         }
       />
-      <p className="text-xs text-muted-foreground">
+      <p className="text-[13px] text-muted-foreground">
         The EICAR string is the standard harmless antivirus test file, not malware. The static ML tier for executables isn&apos;t
         trained in this build, so no ML score appears here.
       </p>

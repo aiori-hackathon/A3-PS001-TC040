@@ -45,11 +45,11 @@ export default function IntegrationsPage() {
                       </div>
                        <p className="text-muted-foreground">{i.detail}</p>
                        {i.kind === "messaging" && i.status === "Not configured" ? (
-                         <p className="text-xs font-medium text-amber-700 dark:text-amber-300">
+                         <p className="text-[13px] font-medium text-amber-700 dark:text-amber-300">
                            Connector implemented; add the listed environment variables and configure the provider webhook to activate it.
                          </p>
                        ) : null}
-                      {i.engine_version ? <p className="font-mono text-xs text-muted-foreground">version {i.engine_version}</p> : null}
+                      {i.engine_version ? <p className="font-mono text-[13px] text-muted-foreground">version {i.engine_version}</p> : null}
                     </div>
                   ))}
                 </CardContent>

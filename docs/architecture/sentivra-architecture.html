@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SENTIVRA Architecture</title>
+<style>
+:root{--bg:#fff;--card:#f8fafc;--line:#cbd5e1;--cy:#0e7490;--vi:#6d28d9;--am:#b45309;--gr:#047857;--rd:#dc2626;--bl:#2563eb;--tx:#1e293b;--mut:#64748b;--hd:#0f172a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:12px/1.35 system-ui,Segoe UI,Arial,sans-serif;overflow-x:auto}
+.wrap{position:relative;min-width:2500px;padding:22px 26px;background:#fff}
+#ov{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:5}
+h1{margin:0;text-align:center;font-size:24px;color:var(--hd)}
+.brand{text-align:center;color:var(--cy);font-weight:700;letter-spacing:3px;font-size:13px;margin-bottom:4px}
+.sub{text-align:center;color:var(--mut);margin:6px auto 16px;max-width:1500px;font-size:13px}
+.flow{display:grid;grid-template-columns:.9fr 1fr 1.35fr 1.15fr 1fr 1.1fr 1.05fr;gap:52px;align-items:start}
+.sec{border:1.5px solid var(--line);border-radius:12px;padding:10px;background:#f1f5f9;position:relative}
+.sec h2{margin:0 0 4px;font-size:13px;display:flex;gap:7px;align-items:center;color:var(--hd)}
+.n{background:var(--cy);color:#fff;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.card{border:1px solid var(--line);border-left:4px solid var(--cy);border-radius:8px;padding:6px 8px;margin-top:7px;background:#fff}
+.card b{display:block;color:var(--hd);margin-bottom:2px}
+.card ul{margin:2px 0 0;padding-left:15px}
+.card.vi{border-left-color:var(--vi)}.card.am{border-left-color:var(--am)}.card.gr{border-left-color:var(--gr)}.card.rd{border-left-color:var(--rd)}.card.bl{border-left-color:var(--bl)}
+.dash{border-style:dashed;border-left-style:solid}
+.rans{border:2px solid var(--rd);background:#fef2f2;box-shadow:0 0 10px #dc262633}
+.rans b{color:var(--rd)}
+.note{color:var(--am);font-style:italic;font-size:11px;margin-top:4px}
+.ok{color:var(--cy);font-style:italic;font-size:11px;margin-top:4px}
+.chip{display:inline-block;border-radius:10px;padding:1px 7px;margin:2px 2px 0 0;font-size:10.5px;font-weight:700;border:1px solid;background:#fff}
+.c-h{color:var(--gr);border-color:var(--gr)}.c-s{color:var(--vi);border-color:var(--vi)}.c-v{color:var(--cy);border-color:var(--cy)}.c-m{color:var(--am);border-color:var(--am)}.c-d{color:var(--rd);border-color:var(--rd)}
+.sub2{margin:8px 0 0;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;font-weight:700}
+.grp{border:1.5px solid var(--line);border-radius:8px;padding:2px 7px 7px;margin-top:7px;background:#fff}
+.grp>.card{margin-top:5px;background:var(--card)}
+.eq{text-align:center;color:var(--am);font-weight:700;margin:2px 0}
+.banner{margin-top:9px;border:2px solid var(--am);background:#fef3c7;color:#78350f;border-radius:8px;padding:7px;font-weight:700;text-align:center}
+.priv{margin-top:7px;border:1px solid var(--rd);border-radius:8px;padding:6px;color:#991b1b;font-size:11px;background:#fef2f2}
+.band{margin-top:18px;border:1.5px solid var(--line);border-radius:12px;padding:10px;background:#f1f5f9}
+.band h2{margin:0 0 4px;font-size:13px;color:var(--hd)}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.legend{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px 22px;color:var(--mut);font-size:11.5px;align-items:center}
+.sw{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:middle;margin-right:5px}
+</style></head><body><div class="wrap" id="wrap">
+<svg id="ov"></svg>
+<div class="brand">SENTIVRA &middot; ONE SECURITY LAYER. EVERY THREAT.</div>
+<h1>SENTIVRA: End-to-End Multi-Layer Cyber Threat Detection and Ransomware Correlation Platform</h1>
+<div class="sub">Unified monitoring of messaging applications, Gmail, documents, images, files, URLs, endpoint activity, logs, and networks, with direct ransomware detection and attack-chain correlation</div>
+
+<div class="flow">
+<div class="sec"><h2><span class="n">1</span>Threat Sources &amp; Input Channels</h2>
+<div class="card bl" id="s1"><b>Gmail</b><ul><li>Provider-authenticated message ingestion</li><li>Bodies, subjects, links, attachments</li></ul></div>
+<div class="card bl" id="s2"><b>Messaging applications</b><ul><li>Telegram</li><li>WhatsApp</li><li>Other normalized message sources</li></ul></div>
+<div class="card bl" id="s3"><b>Documents &amp; images</b><ul><li>Uploaded documents, images, attachments</li><li>Downloaded files</li><li>File metadata and signatures</li></ul></div>
+<div class="card bl" id="s4"><b>User &amp; application inputs</b><ul><li>Prompts</li><li>SQL/NoSQL requests</li><li>URLs and links</li></ul></div>
+<div class="card bl" id="s5"><b>Network &amp; endpoint telemetry</b><ul><li>Network flows, DNS events, PCAP uploads</li><li>Endpoint process/activity events</li><li>Authentication and system logs</li></ul></div>
+</div>
+
+<div class="sec"><h2><span class="n">2</span>Event Normalization</h2>
+<div class="card" id="norm"><b>Universal SecurityEvent Normalizer</b><ul><li>Source identification</li><li>Event type classification</li><li>Content and attachment metadata</li><li>Network context</li><li>Process context</li><li>Privacy-aware normalization</li><li>Common detector input contract</li></ul>
+<div class="sub2">Source type</div><span class="chip c-v">LIVE</span><span class="chip c-s">SIMULATED</span><span class="chip c-m">DEMO_DATA</span></div>
+<div class="ok">All detectors receive the same normalized SecurityEvent contract. Detector implementations do not depend on Gmail, Telegram, WhatsApp, or frontend-specific payload formats.</div>
+</div>
+
+<div class="sec"><h2><span class="n">3</span>Parallel Detection Layers</h2>
+<div class="card vi" id="dA"><b>A. PromptInjectionDetector</b><ul><li>Pattern detection, Unicode/confusable normalization</li><li>Obfuscation checks, instruction override</li><li>Jailbreak and prompt-manipulation indicators</li></ul><div class="note">Rules and bounded heuristics. No trained model claimed in this checkout.</div></div>
+<div class="card vi" id="dB"><b>B. URLDetector</b><ul><li>URL structure, suspicious scheme</li><li>Host/path indicators, lexical features</li></ul><div class="ok">Local analysis. No DNS, HTTP request, or reputation lookup required.</div></div>
+<div class="card vi" id="dC"><b>C. SQLInjectionDetector</b><ul><li>SQL lexical analysis, injection pattern rules</li><li>Tautology and comment indicators</li><li>Bounded rule evaluation</li></ul><div class="ok">Local rules and lexical analysis</div></div>
+<div class="grp" id="dD"><div class="sub2">D. Malware &amp; File Analysis</div>
+<div class="card gr"><b>MalwareDetector</b>Orchestrates file analysis</div>
+<div class="card gr"><b>YaraDetector</b>YARA signature matching</div>
+<div class="card gr dash"><b>ClamAVDetector</b>Optional local antivirus scan</div>
+<div class="card gr"><b>Static file analysis</b>Hash, magic bytes, entropy, extension mismatch, metadata, polyglot indicators</div>
+<div class="note">Raw files analyzed in memory; scanners report unavailable when not configured.</div></div>
+<div class="grp" id="dE"><div class="sub2">E. NetworkAnomalyDetector</div>
+<div class="card"><ul><li>1. Network behavior rules</li><li>2. Statistical baseline</li><li>3. Isolation Forest anomaly model</li><li>4. Autoencoder anomaly model</li><li>5. Calibrated supervised classifier</li></ul><b style="margin-top:4px;color:var(--cy)">Network layer fusion and fusion cut</b></div>
+<div class="note">Model artifacts are integrity-checked and optional. Missing artifacts are reported as unavailable, never silently treated as benign.</div></div>
+<div class="grp" id="dF"><div class="sub2">F. Endpoint &amp; Log Detection</div>
+<div class="card am"><b>BehavioralAnomalyDetector</b><ul><li>Process-start behavior, process/network relationships</li><li>File-extension behavior, fleet baseline, host rules</li></ul></div>
+<div class="card am"><b>SigmaDetector</b>Sigma rule evaluation</div>
+<div class="card am"><b>LogDetector</b>Failed-login bursts, authentication anomalies, system-log heuristics</div>
+<div class="note">Endpoint behavioral detection is rules and baseline based. No deployed endpoint neural model is claimed.</div></div>
+<div class="card rans rd" id="dG"><b>G. RansomwareBehaviorDetector</b><ul><li>MLRan behavioral dataset; 483 selected behavioral features</li><li>Filesystem and API behavior; process and runtime behavior</li><li>Registry and network behavior features</li><li>Calibrated Logistic Regression classifier</li><li>Ransomware probability; verified threshold &asymp; 0.685</li><li>Explainability: SHAP global feature rankings</li></ul>
+<div class="sub2">Inputs</div><span class="chip c-v">&#10132; Direct endpoint behavioral feature vector</span><br><span class="chip c-s" style="border-style:dashed">&#10132; Cyber Defense Lab Mode A replay</span>
+<div class="note">RanDe-W11 is methodology-only. No RanDe pretrained model is used.</div></div>
+</div>
+
+<div class="sec"><h2><span class="n">4</span>Finding Contract &amp; Multi-Model Fusion</h2>
+<div class="card vi" id="dr"><b>DetectionResult[]</b><ul><li>Detector name, severity, score, confidence</li><li>Evidence, recommended action</li><li>Model version, rule IDs</li><li>MITRE ATT&amp;CK mappings</li><li>Availability status</li></ul></div>
+<div class="eq">&#9660;</div>
+<div class="card vi" id="risk"><b>RiskEngine</b><ul><li>Aggregates independent detector findings</li><li>Produces one RiskAssessment</li></ul>
+<span class="chip c-h">SAFE</span><span class="chip c-v">LOW</span><span class="chip c-m">MEDIUM</span><span class="chip c-d">HIGH</span><span class="chip c-d">CRITICAL</span>
+<ul><li>Preserves evidence and analysis errors</li><li>Never treats unavailable analysis as proof of safety</li></ul></div>
+<div class="eq">&#9660;</div>
+<div class="card rd" id="corr"><b>Read-only Attack-Chain Correlation</b>
+<div class="card am" style="margin-top:5px">Suspicious Gmail or Telegram/WhatsApp message</div><div class="eq">+</div>
+<div class="card am" style="margin-top:0">Malicious document or image attachment</div><div class="eq">+</div>
+<div class="card am" style="margin-top:0">Suspicious URL or network behavior</div><div class="eq">+</div>
+<div class="card rd" style="margin-top:0">Ransomware behavioral score</div><div class="eq">=</div>
+<div class="card rans rd" style="margin-top:0"><b>Correlated ransomware attack-chain incident</b></div>
+<div class="ok">Ransomware can be detected directly or correlated as a later stage hidden beneath another attack.</div>
+<div class="note">This is correlation of detector outputs, not a replacement model.</div></div>
+</div>
+
+<div class="sec"><h2><span class="n">5</span>Decision, Safety &amp; Response</h2>
+<div class="card" id="dec"><b>Final Security Assessment</b></div>
+<div class="card gr"><b>No suspicious finding</b><ul><li>Monitor</li><li>Record clean analysis</li></ul></div>
+<div class="card am"><b>Suspicious finding</b><ul><li>Alert, review</li><li>Simulated block where applicable</li></ul></div>
+<div class="card rd" id="br3"><b>Ransomware or correlated attack-chain finding</b><ul><li>Alert</li><li>Dry-run isolation recommendation</li><li>Flag network indicators</li><li>Notify</li><li>Record fusion incident</li></ul></div>
+<div class="banner">Current automated containment is dry-run only. No host process is killed, suspended, or isolated.</div>
+<div class="eq">&#9660;</div>
+<div class="sub2" style="margin-top:0">Persistence</div>
+<div class="card"><ul><li>Event store</li><li>Alert store</li><li>Audit log</li><li>Simulation execution history</li></ul></div>
+</div>
+
+<div class="sec"><h2><span class="n">6</span>Cyber Defense Lab &amp; Telemetry</h2>
+<div class="card vi dash" id="lab"><b>Cyber Defense Lab: Mode A Replay</b><ul><li>Held-out MLRan behavioral replay</li><li>Synthetic document/message/network signals</li><li>No malware execution; no user-file modification</li><li>No registry changes; no process creation</li><li>No outbound network activity</li><li>Dry-run mitigation only</li></ul>
+<span class="chip c-m">Mode B: Not enabled</span></div>
+<div class="card bl dash" id="tele"><b>Aggregate Host Telemetry (opt-in)</b><ul><li>CPU %, memory %</li><li>Disk read/write bytes per second</li><li>Network sent/received bytes per second</li><li>Process count, thread count</li><li>SSE stream; in-memory bounded ring buffer</li></ul></div>
+<div class="priv">Never collects process names, command lines, usernames, paths, hostnames, IP addresses, registry data, or file contents.</div>
+<div class="sub2">Telemetry source labels</div>
+<div class="card"><span class="chip c-h">HOST</span> real aggregate host counters<br><span class="chip c-s">SIMULATED</span> Mode A replay activity<br><span class="chip c-v">SENTIVRA</span> detector, risk, and fusion outputs<br><span class="chip c-m">MITIGATION</span> dry-run response records</div>
+</div>
+
+<div class="sec"><h2><span class="n">7</span>API, Dashboard &amp; Operations</h2>
+<div class="sub2">Backend</div>
+<div class="card" id="be"><ul><li>FastAPI REST API</li><li>Authenticated detector APIs</li><li>Ransomware prediction API</li><li>Simulation API</li><li>SSE telemetry stream</li><li>Model registry</li><li>SQLite persistence</li><li>Audit logging</li></ul></div>
+<div class="sub2">Frontend: SOC dashboard</div>
+<div class="card bl"><ul><li>Overview, Threats, Network</li><li>Files, Messages, Endpoint</li><li>Models, Cyber Defense Lab</li><li>Alerts, Audit Log</li></ul></div>
+<div class="sub2">Lab outputs</div>
+<div class="card gr" id="out"><ul><li>Live host telemetry charts</li><li>Pinned scenario telemetry strip</li><li>Ordered event timeline</li><li>Detection score, time-to-detect, time-to-contain</li><li>Fusion incident, mitigation outcome</li><li>JSON export, CSV ZIP export</li><li>Offline HTML report</li></ul></div>
+</div>
+</div>
+
+<div class="band"><h2>Validation, Explainability &amp; Trust Boundaries</h2>
+<div class="g4">
+<div class="card rd"><b>MLRan ransomware evaluation</b><ul><li>Held-out test split</li><li>Family-grouped validation</li><li>Precision, recall, F1, ROC-AUC</li><li>SHAP explanations</li></ul></div>
+<div class="card"><b>Network model evaluation</b><ul><li>Integrity-checked artifacts</li><li>Optional model availability</li><li>Fusion threshold</li></ul></div>
+<div class="card gr"><b>Privacy and safety</b><ul><li>Aggregate-only host telemetry</li><li>Mode A does not touch host files</li><li>No real malware</li><li>Dry-run mitigation</li></ul></div>
+<div class="card am"><b>Graceful degradation</b><ul><li>Missing model = unavailable</li><li>Failed detector is not SAFE</li><li>No fabricated metrics</li><li>No single model makes the final decision</li></ul></div>
+</div></div>
+
+<div class="legend">
+<span><span class="sw" style="border-color:var(--bl)"></span>Normalized telemetry / data flow</span>
+<span><span class="sw" style="border-color:var(--vi)"></span>Model outputs</span>
+<span><span class="sw" style="border-color:var(--cy)"></span>Available live / local pipeline</span>
+<span><span class="sw" style="border-color:var(--rd)"></span>Suspicious / ransomware result</span>
+<span><span class="sw" style="border-color:var(--am)"></span>Unavailable, degraded, or review</span>
+<span><span class="sw" style="border-color:var(--gr)"></span>Benign / allowed</span>
+<span><span class="sw" style="border-top-style:dashed;border-color:var(--mut)"></span>Optional or simulated path</span>
+<span class="chip c-h">HOST</span><span class="chip c-s">SIMULATED</span><span class="chip c-v">SENTIVRA</span><span class="chip c-m">MITIGATION</span>
+</div>
+</div>
+<script>
+(function(){
+var C={bl:'#2563eb',cy:'#0e7490',vi:'#6d28d9',rd:'#dc2626',gr:'#047857'};
+var L=[];
+['s1','s2','s3','s4','s5'].forEach(function(i){L.push([i,'norm','bl']);});
+['dA','dB','dC','dD','dE','dF'].forEach(function(i){L.push(['norm',i,'cy']);L.push([i,'dr','vi']);});
+L.push(['norm','dG','cy']);L.push(['dG','dr','rd']);
+L.push(['risk','dec','vi']);L.push(['corr','br3','rd']);
+L.push(['lab','out','vi',1]);L.push(['tele','out','bl',1]);
+function pt(el,s,w){var r=el.getBoundingClientRect();return[(s=='r'?r.right:r.left)-w.left,r.top+r.height/2-w.top];}
+function draw(){
+var w=document.getElementById('wrap'),svg=document.getElementById('ov'),b=w.getBoundingClientRect(),h='';
+svg.setAttribute('viewBox','0 0 '+b.width+' '+b.height);
+h+='<defs>';for(var k in C){h+='<marker id="m'+k+'" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="'+C[k]+'"/></marker>';}h+='</defs>';
+L.forEach(function(l){
+var a=document.getElementById(l[0]),z=document.getElementById(l[1]);if(!a||!z)return;
+var p=pt(a,'r',b),q=pt(z,'l',b),dx=Math.max(20,(q[0]-p[0])/2);
+h+='<path d="M'+p[0]+' '+p[1]+' C'+(p[0]+dx)+' '+p[1]+' '+(q[0]-dx)+' '+q[1]+' '+q[0]+' '+q[1]+'" fill="none" stroke="'+C[l[2]]+'" stroke-width="1.7" opacity=".85"'+(l[3]?' stroke-dasharray="6 4"':'')+' marker-end="url(#m'+l[2]+')"/>';
+});
+svg.innerHTML=h;}
+window.addEventListener('load',draw);window.addEventListener('resize',draw);setTimeout(draw,300);
+})();
+</script>
+</body></html>

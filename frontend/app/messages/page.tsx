@@ -36,7 +36,7 @@ function MessageCard({ event }: { event: MessageEvent }) {
       <div className="flex flex-wrap items-center gap-2">
         <span className="font-medium">{SOURCE_LABEL[event.source] ?? event.source}</span>
         <SourceTypeBadge sourceType={event.source_type} />
-        <span className="ml-auto text-xs text-muted-foreground" title={dateTime(event.timestamp)}>
+        <span className="ml-auto text-[13px] text-muted-foreground" title={dateTime(event.timestamp)}>
           {relative(event.timestamp)}
         </span>
       </div>
@@ -44,24 +44,24 @@ function MessageCard({ event }: { event: MessageEvent }) {
         {content?.subject ? <p className="font-medium">{content.subject}</p> : null}
         <p className="break-words text-muted-foreground">{content?.sender ?? "(no sender recorded)"}</p>
         {content?.recipients?.length ? (
-          <p className="break-words text-xs text-muted-foreground">to {content.recipients.join(", ")}</p>
+          <p className="break-words text-[13px] text-muted-foreground">to {content.recipients.join(", ")}</p>
         ) : null}
       </div>
       {urls.length ? (
         <div className="space-y-0.5">
-          <p className="text-xs font-medium text-muted-foreground">URLs found (shown as text, not links)</p>
+          <p className="text-[13px] font-medium text-muted-foreground">URLs found (shown as text, not links)</p>
           {urls.map((url) => (
-            <p key={url} className="break-all font-mono text-xs">{url}</p>
+            <p key={url} className="break-all font-mono text-[13px]">{url}</p>
           ))}
         </div>
       ) : null}
       {event.attachments.length ? (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-[13px] text-muted-foreground">
           Attachments: {event.attachments.map((a) => `${a.filename} (${a.declared_mime ?? "unknown type"})`).join(", ")}
           {" — "}metadata only, bytes never fetched
         </p>
       ) : null}
-      <p className="text-xs text-muted-foreground">
+      <p className="text-[13px] text-muted-foreground">
         {content && content.body === null && sha
           ? <>Body not retained: analyzed in memory, stored as SHA-256 {sha.slice(0, 16)}…</>
           : "Body not retained."}
@@ -125,7 +125,7 @@ export default function MessagesPage() {
           {messages.map((m) => (
             <MessageCard key={m.event_id} event={m} />
           ))}
-          <p className="text-xs text-muted-foreground">
+          <p className="text-[13px] text-muted-foreground">
             Connector-delivered bodies remain redacted in storage. Use the forms above for direct URL and SQL checks;
             URL analysis never fetches the submitted address.
           </p>

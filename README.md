@@ -1,5 +1,26 @@
 # SENTIVRA
 
+## 1. Architecture
+
+<p align="center">
+  <a href="docs/architecture/sentivra-architecture.html">
+    <img src="docs/architecture/sentivra-architecture-preview.png" alt="SENTIVRA end-to-end architecture" width="100%" />
+  </a>
+</p>
+
+The complete interactive architecture diagram is available as [SENTIVRA Architecture](docs/architecture/sentivra-architecture.html).
+
+## 2. Demo video
+
+<video controls preload="metadata" width="100%">
+  <source src="docs/media/sentivra-architecture-and-demo.mp4" type="video/mp4" />
+  Your browser does not support embedded video. [Watch or download the SENTIVRA architecture and demo video](docs/media/sentivra-architecture-and-demo.mp4).
+</video>
+
+[Watch or download the SENTIVRA architecture and demo video](docs/media/sentivra-architecture-and-demo.mp4)
+
+## 3. Snapshots
+
 <p align="center">
   <img src="docs/screenshots/snapshot-cyber-defense-overview.png" alt="SENTIVRA Cyber Defense Command Center overview" width="49%" />
   <img src="docs/screenshots/snapshot-cyber-defense-topology.png" alt="SENTIVRA security topology and scenario launcher" width="49%" />
@@ -9,9 +30,11 @@
   <img src="docs/screenshots/snapshot-cyber-defense-evidence.png" alt="SENTIVRA detector evidence and execution timeline" width="49%" />
 </p>
 
-TEAM INTRODUCTION: https://youtube.com/shorts/fAVnNkiJjwA?feature=share
+## 4. Explanation
 
 > **About this repository.** This is the team's **AIORI-3 hackathon submission** (problem statement PS001, team TC040): a snapshot of the SENTIVRA platform plus the submission materials ([Sentivra_Hackathon.pdf](Sentivra_Hackathon.pdf)) and the [research/](research/) evaluation environment. The primary SENTIVRA repository continues separately; nothing here depends on it at runtime.
+
+**Team introduction:** https://youtube.com/shorts/fAVnNkiJjwA?feature=share
 
 **One Security Layer. Every Threat.**
 

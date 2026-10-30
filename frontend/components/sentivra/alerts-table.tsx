@@ -28,7 +28,7 @@ export function AlertsTable({ alerts }: { alerts: AlertListItem[] }) {
                 <Link href={`/threats/${a.assessment_id}`} className="font-medium underline-offset-4 hover:underline">
                   {classificationLabel(a.classification)}
                 </Link>
-                <span className="ml-2 font-mono text-xs text-muted-foreground">{shortId(a.assessment_id)}</span>
+                <span className="ml-2 font-mono text-[13px] text-muted-foreground">{shortId(a.assessment_id)}</span>
               </TableCell>
               <TableCell className="max-w-[16rem] truncate text-muted-foreground" title={a.findings.map((f) => f.detector).join(", ")}>
                 {a.findings.map((f) => detectorLabel(f.detector)).join(", ")}
@@ -36,7 +36,7 @@ export function AlertsTable({ alerts }: { alerts: AlertListItem[] }) {
               <TableCell>
                 <div className="flex items-center gap-2">
                   <SourceTypeBadge sourceType={a.event.source_type} />
-                  <span className="text-xs text-muted-foreground">{a.event.source}</span>
+                  <span className="text-[13px] text-muted-foreground">{a.event.source}</span>
                 </div>
               </TableCell>
               <TableCell className="text-right tabular">{a.risk_score}</TableCell>

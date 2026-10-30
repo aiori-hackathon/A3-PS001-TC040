@@ -16,7 +16,7 @@ const BAR_THICKNESS = 14;
 function ValueTooltip({ active, payload, label }: TooltipContentProps) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-md border bg-popover px-3 py-2 text-xs shadow-sm">
+    <div className="rounded-md border bg-popover px-3 py-2 text-[13px] shadow-sm">
       <div className="text-sm font-semibold tabular text-foreground">{integer(Number(payload[0].value))}</div>
       <div className="text-muted-foreground">{label}</div>
     </div>

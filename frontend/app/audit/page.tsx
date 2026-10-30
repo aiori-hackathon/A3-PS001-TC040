@@ -33,8 +33,8 @@ export default function AuditPage() {
                       <TableCell className="whitespace-nowrap tabular">{dateTime(e.created_at)}</TableCell>
                       <TableCell>{e.actor}</TableCell>
                       <TableCell>{humanize(e.action)}</TableCell>
-                      <TableCell className="font-mono text-xs">{e.resource}</TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">
+                      <TableCell className="font-mono text-[13px]">{e.resource}</TableCell>
+                      <TableCell className="font-mono text-[13px] text-muted-foreground">
                         {Object.entries(e.detail).filter(([, v]) => v !== null).map(([k, v]) => `${k}=${String(v)}`).join("  ")}
                       </TableCell>
                     </TableRow>

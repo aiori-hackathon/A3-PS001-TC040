@@ -7,13 +7,13 @@ import type { DetectionResult, MitreMapping, RiskAssessment } from "@/types/api"
 
 export function MitreList({ mappings }: { mappings: MitreMapping[] }) {
   if (!mappings.length) {
-    return <p className="text-xs text-muted-foreground">No ATT&CK / ATLAS mapping. The evidence doesn&apos;t identify a technique.</p>;
+    return <p className="text-[13px] text-muted-foreground">No ATT&CK / ATLAS mapping. The evidence doesn&apos;t identify a technique.</p>;
   }
   return (
     <ul className="flex flex-wrap gap-1.5">
       {mappings.map((m) => (
         <li key={m.technique_id} title={`${m.tactic} · ${m.source}`}
-          className="rounded-md border px-2 py-0.5 text-xs">
+          className="rounded-md border px-2 py-0.5 text-[13px]">
           <span className="font-mono font-medium">{m.technique_id}</span>{" "}
           <span className="text-muted-foreground">{m.technique_name}</span>
         </li>
@@ -29,23 +29,23 @@ export function FindingCard({ finding }: { finding: DetectionResult }) {
         <div className="flex items-center gap-2">
           <span className="font-medium">{finding.detector}</span>
           <SeverityBadge severity={finding.severity} />
-          {finding.status && finding.status !== "suspicious" ? <span className="text-xs text-amber-700 dark:text-amber-300">{finding.status.replaceAll("_", " ")}</span> : null}
+          {finding.status && finding.status !== "suspicious" ? <span className="text-[13px] text-amber-700 dark:text-amber-300">{finding.status.replaceAll("_", " ")}</span> : null}
         </div>
-        <span className="text-xs text-muted-foreground tabular">
+        <span className="text-[13px] text-muted-foreground tabular">
           score {finding.score.toFixed(2)} · confidence {percent(finding.confidence)} · action {finding.recommended_action}
         </span>
       </div>
       <ul className="space-y-2.5 text-sm">
         {finding.evidence.map((e, i) => (
           <li key={i} className="min-w-0 space-y-0.5">
-            <span className="block font-mono text-[11px] break-all text-muted-foreground">{e.type}</span>
+            <span className="block font-mono text-[13px] break-all text-muted-foreground">{e.type}</span>
             <span className="block break-words">{e.detail}</span>
-            {e.excerpt ? <span className="block text-xs break-words text-muted-foreground">{e.excerpt}</span> : null}
+            {e.excerpt ? <span className="block text-[13px] break-words text-muted-foreground">{e.excerpt}</span> : null}
           </li>
         ))}
       </ul>
       <MitreList mappings={finding.mitre_attack} />
-      {finding.model_version ? <p className="text-xs text-muted-foreground">Detector version: {finding.model_version}</p> : null}
+      {finding.model_version ? <p className="text-[13px] text-muted-foreground">Detector version: {finding.model_version}</p> : null}
     </div>
   );
 }

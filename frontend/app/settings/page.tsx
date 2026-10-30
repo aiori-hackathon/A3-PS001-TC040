@@ -22,13 +22,13 @@ export default function SettingsPage() {
           <CardHeader><CardTitle>Connection</CardTitle></CardHeader>
           <CardContent className="space-y-3 text-sm">
             <dl className="grid grid-cols-[9rem_1fr] gap-y-1.5">
-              <dt className="text-muted-foreground">API base URL</dt><dd className="font-mono text-xs break-all">{API_BASE}</dd>
+              <dt className="text-muted-foreground">API base URL</dt><dd className="font-mono text-[13px] break-all">{API_BASE}</dd>
               <dt className="text-muted-foreground">Environment</dt><dd>{health.data?.environment ?? "…"}</dd>
               <dt className="text-muted-foreground">Database</dt><dd>{health.data ? <StatusPill status={health.data.database === "ok" ? "Available" : "Error"} /> : "…"}</dd>
               <SessionDetails />
             </dl>
             {health.error ? <ErrorState error={health.error} /> : null}
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[13px] text-muted-foreground">
               Set NEXT_PUBLIC_API_BASE_URL in frontend/.env.local to point the dashboard at another backend, and add this
               dashboard&apos;s origin to SENTIVRA_CORS_ORIGINS on the backend.
             </p>
@@ -62,7 +62,7 @@ export default function SettingsPage() {
           {detectors.data?.map((d) => (
             <div key={d.name} className="flex flex-wrap items-start justify-between gap-2 rounded-lg border p-3 text-sm">
               <div className="min-w-0">
-                <p className="font-medium">{d.name} <span className="text-xs text-muted-foreground">v{d.version}</span></p>
+                <p className="font-medium">{d.name} <span className="text-[13px] text-muted-foreground">v{d.version}</span></p>
                 <p className="break-words text-muted-foreground">{d.availability.detail}</p>
               </div>
               <StatusPill status={d.availability.status} />

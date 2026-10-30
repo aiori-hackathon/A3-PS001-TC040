@@ -21,7 +21,7 @@ export function SeverityBadge({ severity, className }: { severity: Severity; cla
   return (
     <span
       className={cn(
-        "inline-flex h-5 items-center gap-1 rounded-full border px-2 text-xs font-medium whitespace-nowrap text-foreground",
+        "inline-flex h-5 items-center gap-1 rounded-full border px-2 text-[13px] font-medium whitespace-nowrap text-foreground",
         className,
       )}
       style={{
@@ -45,7 +45,7 @@ const SOURCE_STYLE: Record<SourceType, { icon: typeof Info; label: string; title
 
 export function SourceTypeBadge({ sourceType, className }: { sourceType: SourceType | null; className?: string }) {
   if (!sourceType) {
-    return <span className={cn("text-xs text-muted-foreground", className)}>Unknown source</span>;
+    return <span className={cn("text-[13px] text-muted-foreground", className)}>Unknown source</span>;
   }
   const style = SOURCE_STYLE[sourceType];
   const Icon = style.icon;
@@ -53,7 +53,7 @@ export function SourceTypeBadge({ sourceType, className }: { sourceType: SourceT
     <span
       title={style.title}
       className={cn(
-        "inline-flex h-5 items-center gap-1 rounded-md border px-1.5 text-xs font-medium whitespace-nowrap",
+        "inline-flex h-5 items-center gap-1 rounded-md border px-1.5 text-[13px] font-medium whitespace-nowrap",
         sourceType === "LIVE" ? "border-foreground/25 text-foreground" : "border-dashed border-foreground/30 text-muted-foreground",
         className,
       )}
@@ -73,7 +73,7 @@ export function StatusPill({ status }: { status: Availability | string }) {
   const color = good ? "var(--status-good)" : partial ? "var(--status-warning)" : bad ? "var(--status-critical)" : "var(--status-low)";
   const Icon = good ? CircleCheck : partial ? TriangleAlert : bad ? OctagonAlert : Info;
   return (
-    <span className="inline-flex items-center gap-1 text-xs font-medium whitespace-nowrap text-foreground">
+    <span className="inline-flex items-center gap-1 text-[13px] font-medium whitespace-nowrap text-foreground">
       <Icon className="size-3.5" style={{ color }} aria-hidden />
       {status}
     </span>

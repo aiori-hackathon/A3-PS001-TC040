@@ -63,7 +63,7 @@ export default function ModelsPage() {
                   {humanize(entry.domain)} / {humanize(entry.name)}
                   <StatusPill status={entry.trained ? "Available" : "Not trained"} />
                 </CardTitle>
-                <CardDescription className="font-mono text-xs">{entry.directory}</CardDescription>
+                <CardDescription className="font-mono text-[13px]">{entry.directory}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 {context ? <p className="rounded-md border border-dashed p-2 text-muted-foreground">{context}</p> : null}
@@ -78,8 +78,8 @@ export default function ModelsPage() {
                       <dt className="text-muted-foreground">Split</dt><dd>{m.split_method ?? "—"}</dd>
                       <dt className="text-muted-foreground">Evaluated</dt><dd>{m.evaluation_date ?? "—"}</dd>
                       <dt className="text-muted-foreground">Threshold</dt>
-                      <dd>{m.threshold != null ? significant(m.threshold) : "—"}{m.threshold_policy ? <span className="block text-xs text-muted-foreground">{m.threshold_policy}</span> : null}</dd>
-                      <dt className="text-muted-foreground">SHA-256</dt><dd className="font-mono text-xs break-all">{m.sha256}</dd>
+                      <dd>{m.threshold != null ? significant(m.threshold) : "—"}{m.threshold_policy ? <span className="block text-[13px] text-muted-foreground">{m.threshold_policy}</span> : null}</dd>
+                      <dt className="text-muted-foreground">SHA-256</dt><dd className="font-mono text-[13px] break-all">{m.sha256}</dd>
                     </dl>
                     <Metrics metrics={m.evaluation_metrics} />
                     {m.limitations.length ? (

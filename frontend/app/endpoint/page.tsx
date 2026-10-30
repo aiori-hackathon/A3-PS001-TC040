@@ -31,21 +31,21 @@ function BatchDetails({ result }: { result: BatchAnalysisResponse }) {
         {sigma.map((s) => (
           <div key={s.rule_id} className="space-y-1.5 rounded-lg border p-3 text-sm">
             <p className="font-medium">{s.title}</p>
-            <p className="text-xs text-muted-foreground">{humanize(s.level)} · {s.matches} match(es) · {s.hosts.join(", ")}</p>
+            <p className="text-[13px] text-muted-foreground">{humanize(s.level)} · {s.matches} match(es) · {s.hosts.join(", ")}</p>
             <MitreList mappings={s.mitre_attack} />
           </div>
         ))}
       </Section>
       <Section title="Host behavior" description={behavior ? `Fleet baseline: ${behavior.baseline}` : "Not run for this input"}>
         {behavior?.rules_skipped_without_baseline.length ? (
-          <p className="text-xs text-muted-foreground">Not evaluated without a baseline: {behavior.rules_skipped_without_baseline.join(", ")}</p>
+          <p className="text-[13px] text-muted-foreground">Not evaluated without a baseline: {behavior.rules_skipped_without_baseline.join(", ")}</p>
         ) : null}
         {behavior && behavior.findings.length === 0 ? <p className="text-sm text-muted-foreground">No host rule fired.</p> : null}
         {behavior?.findings.map((f, i) => (
           <div key={`${f.rule}-${i}`} className="space-y-1.5 rounded-lg border p-3 text-sm">
             <p className="font-medium">{humanize(f.rule)}</p>
-            <p className="font-mono text-xs break-all text-muted-foreground">{f.host}: {f.subject}</p>
-            {f.ground_truth_labels.length ? <p className="text-xs">Simulated scenario: {f.ground_truth_labels.join(", ")}</p> : null}
+            <p className="font-mono text-[13px] break-all text-muted-foreground">{f.host}: {f.subject}</p>
+            {f.ground_truth_labels.length ? <p className="text-[13px]">Simulated scenario: {f.ground_truth_labels.join(", ")}</p> : null}
             <MitreList mappings={f.mitre_attack} />
           </div>
         ))}
@@ -55,7 +55,7 @@ function BatchDetails({ result }: { result: BatchAnalysisResponse }) {
         {auth.map((a, i) => (
           <div key={`${a.rule}-${i}`} className="space-y-1.5 rounded-lg border p-3 text-sm">
             <p className="font-medium">{humanize(a.rule)}</p>
-            <p className="font-mono text-xs text-muted-foreground">{a.subject}</p>
+            <p className="font-mono text-[13px] text-muted-foreground">{a.subject}</p>
             <MitreList mappings={a.mitre_attack} />
           </div>
         ))}
@@ -81,7 +81,7 @@ export default function EndpointPage() {
           </>
         }
       />
-      <p className="text-xs text-muted-foreground">
+      <p className="text-[13px] text-muted-foreground">
         The simulated fleet emits genuine osquery result logs with neutral placeholder command lines; it&apos;s labeled Simulated.
         Deploy endpoint-agent/osquery/sentivra-pack.conf to collect real telemetry. Log uploads accept auth.log, Windows Security
         events as JSON lines, and Wazuh alerts.json.

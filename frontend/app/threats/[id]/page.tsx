@@ -89,7 +89,7 @@ export default function ThreatDetailPage() {
                   <dt className="text-muted-foreground">Source</dt><dd>{event.source}</dd>
                   <dt className="text-muted-foreground">Type</dt><dd>{humanize(event.event_type)}</dd>
                   <dt className="text-muted-foreground">Time</dt><dd>{dateTime(event.timestamp)}</dd>
-                  <dt className="text-muted-foreground">Event ID</dt><dd className="font-mono text-xs break-all">{event.event_id}</dd>
+                  <dt className="text-muted-foreground">Event ID</dt><dd className="font-mono text-[13px] break-all">{event.event_id}</dd>
                 </dl>
                 {event.attachments.length ? (
                   <div>
@@ -98,7 +98,7 @@ export default function ThreatDetailPage() {
                       {event.attachments.map((a) => (
                         <li key={a.sha256 ?? a.filename} className="rounded-md border p-2">
                           <p className="font-medium break-all">{a.filename}</p>
-                          <p className="font-mono text-xs break-all text-muted-foreground">sha256 {a.sha256}</p>
+                          <p className="font-mono text-[13px] break-all text-muted-foreground">sha256 {a.sha256}</p>
                         </li>
                       ))}
                     </ul>
@@ -106,7 +106,7 @@ export default function ThreatDetailPage() {
                 ) : null}
                 <details>
                   <summary className="cursor-pointer text-muted-foreground">Event metadata</summary>
-                  <pre className="mt-2 max-h-80 overflow-auto rounded-md bg-muted p-2 text-xs">
+                  <pre className="mt-2 max-h-80 overflow-auto rounded-md bg-muted p-2 text-[13px]">
                     {JSON.stringify({ ...event.metadata, file_metadata: undefined }, null, 2)}
                   </pre>
                 </details>

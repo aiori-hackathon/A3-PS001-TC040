@@ -63,7 +63,7 @@ function SignIn() {
               <Input id="client-secret" type="password" value={secret} onChange={(e) => setSecret(e.target.value)}
                 autoComplete="current-password" spellCheck={false} required
                 aria-invalid={error ? true : undefined} aria-describedby={error ? "sign-in-error" : "secret-hint"} />
-              <p id="secret-hint" className="text-xs text-muted-foreground">
+              <p id="secret-hint" className="text-[13px] text-muted-foreground">
                 On first start, a development backend prints the <code>dashboard</code> secret once in its log. Only a
                 hash is kept, in <code>.sentivra/clients.json</code>. If you lost the secret, delete that file and
                 restart the backend to get a new one.
@@ -97,8 +97,8 @@ export function SessionDetails() {
   if (!session) return null;
   return (
     <>
-      <dt className="text-muted-foreground">Signed in as</dt><dd className="font-mono text-xs">{session.clientId}</dd>
-      <dt className="text-muted-foreground">Token scopes</dt><dd className="font-mono text-xs">{session.scope}</dd>
+      <dt className="text-muted-foreground">Signed in as</dt><dd className="font-mono text-[13px]">{session.clientId}</dd>
+      <dt className="text-muted-foreground">Token scopes</dt><dd className="font-mono text-[13px]">{session.scope}</dd>
       <dt className="text-muted-foreground">Token expires</dt>
       <dd>{new Date(session.expiresAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</dd>
     </>
@@ -117,7 +117,7 @@ export function SessionMenu() {
   }
 
   return (
-    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+    <span className="flex items-center gap-1 text-[13px] text-muted-foreground">
       <span className="hidden sm:inline">Client <span className="font-mono text-foreground">{client}</span></span>
       <Button variant="ghost" size="icon-sm" onClick={signOut} aria-label="Sign out" title="Sign out">
         <LogOut />
