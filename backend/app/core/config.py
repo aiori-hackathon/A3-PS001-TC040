@@ -13,7 +13,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Annotated
 
-from pydantic import field_validator
+from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 # backend/app/core/config.py -> repo root is three parents up
@@ -76,6 +76,15 @@ class Settings(BaseSettings):
     # unchanged.
     ransomware_model_enabled: bool = False
     ransomware_model_dir: Path = REPO_ROOT / "models" / "ransomware" / "mlran"
+
+    # Cyber Defense Lab telemetry is opt-in. It samples aggregate host
+    # counters only while an authenticated Lab client has an open stream.
+    lab_telemetry_enabled: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("SENTIVRA_LAB_TELEMETRY_ENABLED", "LAB_TELEMETRY_ENABLED"),
+    )
+    lab_telemetry_ring_seconds: int = 15 * 60
+    lab_telemetry_sample_interval_s: float = 1.0
 
     @field_validator("yara_rules_dir", "models_dir", "rules_dir", "state_dir", "ransomware_model_dir", mode="after")
     @classmethod

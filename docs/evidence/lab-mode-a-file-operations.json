@@ -1,0 +1,17 @@
+{
+  "evidence_type": "Mode A file/process/network operation recording",
+  "recorded_on": "2026-10-30",
+  "branch": "feature/lab-live-telemetry",
+  "scenario": "ransomware-replay",
+  "mode": "Mode A replay",
+  "method": "The integration test audited writable builtins.open calls, subprocess creation, process signals, and outbound socket creation while executing the existing synchronous simulation route.",
+  "observed": {
+    "host_file_writes": 0,
+    "subprocess_spawns": 0,
+    "process_signals": 0,
+    "outbound_network_calls": 0,
+    "sentivra_test_database_persistence": true
+  },
+  "result": "PASS",
+  "safety_statement": "Mode A replay: no real malware, host files not modified."
+}

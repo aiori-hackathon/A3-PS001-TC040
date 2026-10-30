@@ -43,6 +43,7 @@ dependencies = [
     # Gmail Pub/Sub push JWT against Google's published certificates. PyJWT
     # only implements RS256 when `cryptography` is present.
     "cryptography>=42",
+    "psutil>=7.0,<8.0",     # aggregate read-only Lab telemetry
 ]
 
 [project.optional-dependencies]

@@ -25,6 +25,7 @@ from app.api import (
     events,
     health,
     integrations,
+    lab_telemetry,
     logs,
     metrics,
     models,
@@ -138,6 +139,7 @@ def create_app() -> FastAPI:
     app.include_router(metrics.router)
     app.include_router(audit.router)
     app.include_router(integrations.router)
+    app.include_router(lab_telemetry.router)
     app.include_router(webhooks.router)
     app.include_router(ransomware.router)
     app.include_router(simulation.router)

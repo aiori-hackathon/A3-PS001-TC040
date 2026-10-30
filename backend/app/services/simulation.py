@@ -22,6 +22,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.audit import service as audit_service
+from app.core.config import get_settings
 from app.detectors.base import AvailabilityStatus, DetectorAvailability
 from app.detectors.file.metadata import analyze_file
 from app.detectors.registry import DetectorRegistry
@@ -48,6 +49,8 @@ from app.services.alert_repository import AlertRepository
 from app.services.event_repository import EventRepository
 from app.services.local_target import synthetic_search_target
 from app.services.pipeline import run_pipeline
+from app.telemetry.records import ScenarioTelemetryRecord
+from app.telemetry.records import store as telemetry_store
 
 SIMULATION_TIMEOUT_SECONDS = 15.0
 AVAILABILITY_TIMEOUT_SECONDS = 2.0
@@ -461,6 +464,14 @@ async def _execute(
         db.rollback()
         raise SimulationPersistenceError(_SAFE_ERROR) from exc
 
+    telemetry_record: ScenarioTelemetryRecord | None = None
+    if get_settings().lab_telemetry_enabled:
+        # The existing request key is already the idempotency boundary. Using
+        # it as the telemetry id lets the Lab show a partial record before the
+        # synchronous simulation response returns, without changing the run
+        # execution model or request schema.
+        telemetry_record = telemetry_store.start(request_key, scenario.scenario_id, scenario.name)
+
     detector_results: list[DetectionResult] = []
     findings: list[DetectionResult] = []
     assessment: RiskAssessment | None = None
@@ -468,6 +479,8 @@ async def _execute(
     availability: dict[str, Any] = {}
     try:
         event = _fixture(scenario)
+        if telemetry_record:
+            telemetry_record.record_stage_signal(scenario.context_signals)
         timeline.append({"stage": "fixture_created", "timestamp": _iso(datetime.now(UTC))})
         availability_errors: list[str] = []
         available = True
@@ -511,6 +524,16 @@ async def _execute(
             row.completed_at = datetime.now(UTC)
             row.duration_ms = max(0.0, (row.completed_at - started).total_seconds() * 1000)
             timeline.append({"stage": "execution_completed", "timestamp": _iso(row.completed_at)})
+            if telemetry_record:
+                telemetry_record.complete(
+                    detector_results=detector_results,
+                    findings=findings,
+                    assessment=assessment,
+                    fusion_incident=None,
+                    detection_state=target_result["detection_state"],
+                    enforcement_decision=target_result["enforcement_decision"],
+                    errors=errors,
+                )
             EventRepository(db).create_if_absent(event, commit=False)
             if assessment.severity.rank > 0:
                 AlertRepository(db).create(assessment, commit=False)
@@ -571,6 +594,16 @@ async def _execute(
         row.alert_id = assessment.assessment_id if assessment.severity.rank > 0 else None
         row.completed_at, row.duration_ms = completed, max(0.0, (completed - started).total_seconds() * 1000)
         row.error_detail = "Local analysis was incomplete" if errors else None
+        if telemetry_record:
+            telemetry_record.complete(
+                detector_results=detector_results,
+                findings=findings,
+                assessment=assessment,
+                fusion_incident=fusion_incident,
+                detection_state=detection_state,
+                enforcement_decision=decision,
+                errors=errors or [],
+            )
         row.result_json = json.dumps({
             "mode": "simulation", "scenario": _scenario_summary(scenario),
             "findings": [f.model_dump(mode="json") for f in findings],
@@ -585,6 +618,8 @@ async def _execute(
         db.commit()
         return row
     except asyncio.CancelledError:
+        if telemetry_record:
+            telemetry_record.fail("Mode A replay was cancelled safely; no host action was taken")
         db.rollback()
         findings = [result for result in detector_results if result.severity != Severity.SAFE]
         _record_failure(
@@ -595,6 +630,8 @@ async def _execute(
         # Detector failures are normally converted to partial analysis by the
         # shared pipeline. This branch is for fixture, timeout, or persistence
         # failures and deliberately discards the exception text.
+        if telemetry_record:
+            telemetry_record.fail()
         db.rollback()
         findings = [result for result in detector_results if result.severity != Severity.SAFE]
         return _record_failure(
@@ -652,6 +689,10 @@ def serialize(row: SimulationExecutionORM) -> dict[str, Any]:
         body = json.loads(row.result_json or "{}")
     except (TypeError, ValueError):
         body = {"errors": [_SAFE_ERROR]}
+    if get_settings().lab_telemetry_enabled:
+        telemetry = telemetry_store.get(row.request_key) or telemetry_store.get(row.execution_id)
+        if telemetry:
+            body = {**body, "lab_telemetry": telemetry.public_payload()}
     defaults = {
         "mode": "simulation", "findings": [], "detector_results": [], "risk_assessment": None,
         "detector_availability": {}, "errors": [], "timeline": [],
