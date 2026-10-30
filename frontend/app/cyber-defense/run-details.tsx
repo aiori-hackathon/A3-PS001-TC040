@@ -1,6 +1,6 @@
 import { Clock3, Download, Eye, Fingerprint, ListChecks, ShieldAlert, ShieldCheck, ShieldX } from "lucide-react";
 
-import { SeverityBadge } from "@/components/sentivra/badges";
+import { SeverityBadge, SourceTypeBadge } from "@/components/sentivra/badges";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { detectionLabel, displayedScenario, durationMs, formatDuration, formatTimestamp, readable, runOutcome, timelineElapsed } from "@/lib/simulation";
@@ -21,11 +21,11 @@ export function RunDetails({ run, scenarios, onDownload }: { run: SimulationRun;
     <section className={styles.report} aria-label="Selected execution report">
       <Card className={styles.resultCard} data-tone={outcome.tone}>
         <CardHeader>
-          <div className={styles.sectionHeading}><div><p className={styles.eyebrow}>Simulation result</p><h2>{scenario.name}</h2></div></div>
+          <div className={styles.sectionHeading}><div><p className={styles.eyebrow}>Selected execution</p><h2>{scenario.name}</h2></div><div><SourceTypeBadge sourceType={run.source_type} /><span className={styles.marker}>SIMULATED EVENT</span></div></div>
           <p className={styles.executionId}><Fingerprint size={14} aria-hidden="true" />{run.execution_id}</p>
         </CardHeader>
         <CardContent className={styles.resultBody}>
-          <div className={styles.verdict}><VerdictIcon size={34} aria-hidden="true" /><div><h3>{outcome.label}</h3><p>{outcome.explanation}</p><Button variant="outline" size="sm" onClick={onDownload}><Download /> Download report (.md)</Button></div></div>
+           <div className={styles.verdict}><VerdictIcon size={22} aria-hidden="true" /><div><h3>{outcome.label}</h3><p>{outcome.explanation}</p><Button variant="outline" size="sm" onClick={onDownload}><Download /> Download report (.md)</Button></div></div>
           <div className={styles.keyEvidence}><strong>Key evidence</strong>{topEvidence.length ? <ul>{topEvidence.map((item, index) => <li key={`${item.detector}-${index}`}><span>{item.detector}</span>{item.detail}</li>)}</ul> : <p>No evidence items were recorded. That does not establish safety outside this fixture.</p>}</div>
            <dl className={styles.resultMetrics}>
             <div><dt>Execution</dt><dd>{readable(run.status)}</dd></div>
