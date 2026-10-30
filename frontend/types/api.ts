@@ -148,6 +148,71 @@ export interface RansomwareHealth {
   engine_version?: string | null;
 }
 
+export interface LabTelemetryStatus {
+  enabled: boolean;
+  sample_interval_seconds: number | null;
+  ring_seconds: number | null;
+  transport: "sse" | null;
+  mode_a: string;
+  mode_b: "Not enabled";
+}
+
+export interface HostTelemetrySample {
+  source: "host";
+  timestamp: string;
+  cpu_percent: number | null;
+  memory_percent: number | null;
+  disk_read_bytes_per_second: number | null;
+  disk_write_bytes_per_second: number | null;
+  network_sent_bytes_per_second: number | null;
+  network_received_bytes_per_second: number | null;
+  process_count: number | null;
+  thread_count: number | null;
+}
+
+export type LabTelemetrySource = "host" | "simulated" | "sentivra" | "mitigation";
+
+export interface LabTelemetryEvent {
+  t_offset_ms: number;
+  timestamp: string;
+  source: LabTelemetrySource;
+  type: "scenario_started" | "stage_signal" | "ransomware_score" | "detection" | "fusion_incident" | "mitigation_triggered" | "containment_complete" | "scenario_ended";
+  message: string;
+  payload: Record<string, number>;
+}
+
+export interface LabTelemetryRun {
+  scenario_run_id: string;
+  scenario_type: string;
+  mode: "Mode A replay";
+  status: string;
+  final_status: string;
+  start_time: string;
+  end_time: string | null;
+  metadata: {
+    app_version: string;
+    model_versions: string[];
+    thresholds_used: number[];
+    sources_contributing: LabTelemetrySource[];
+    safety_statement: string;
+    mode_b: "Not implemented";
+  };
+  timeline: LabTelemetryEvent[];
+  host_samples: HostTelemetrySample[];
+  summary: {
+    time_to_detect_ms: number | null;
+    time_to_contain_ms: number | null;
+    peak_score: number | null;
+    samples_replayed_before_alert: number | null;
+    samples_replayed: number;
+    mitigation_outcome: string;
+    peak_host_cpu_percent: number | null;
+    peak_host_disk_bytes_per_second: number | null;
+    host_sample_count: number;
+    fusion_incident: boolean;
+  };
+}
+
 export interface SimulationRun {
   execution_id: string;
   scenario_id: string;
@@ -174,6 +239,7 @@ export interface SimulationRun {
   scenario?: { id: string; name: string; limitation: string };
   target?: { endpoint: string; status_code: number; response: Record<string, unknown>; protected_operation_executed: boolean; target_execution_state: string; request_id: string };
   fusion_incident?: { incident_id: string; classification: string; ransomware_detector: string; supporting_signals: Record<string, unknown>[]; signal_count: number; mitigation: { mode: string; actions: string[]; real_world_action_taken: boolean } } | null;
+  lab_telemetry?: LabTelemetryRun;
 }
 
 export interface SimulationStats {

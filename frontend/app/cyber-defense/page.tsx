@@ -13,6 +13,7 @@ import { createRequestKey, detectionLabel, displayedScenario, formatDuration, fo
 import type { RansomwareHealth, SimulationRun, SimulationScenario, SimulationStats } from "@/types/api";
 import { RunDetails } from "./run-details";
 import { Topology } from "./topology";
+import { HostTelemetryPanel, ScenarioTelemetryStrip, useLabHostTelemetry } from "./lab-telemetry";
 import styles from "./command-center.module.css";
 
 type Attempt = { scenarioId: string; requestKey: string };
@@ -21,6 +22,7 @@ export default function CyberDefensePage() {
   const scenarios = useApi<SimulationScenario[]>("/api/simulation/scenarios");
   const stats = useApi<SimulationStats>("/api/simulation/stats");
   const ransomwareHealth = useApi<RansomwareHealth>("/api/v1/ransomware/health");
+  const telemetryStatus = useApi<import("@/types/api").LabTelemetryStatus>("/api/v1/lab-telemetry/status");
   const [offset, setOffset] = useState(0);
   const history = useApi<SimulationRun[]>(`/api/simulation/runs?limit=${HISTORY_PAGE_SIZE + 1}&offset=${offset}`, { keepPreviousData: false });
   const [selectedId, setSelectedId] = useState("");
@@ -28,6 +30,9 @@ export default function CyberDefensePage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [attempt, setAttempt] = useState<Attempt | null>(null);
+  const [telemetryRun, setTelemetryRun] = useState<import("@/types/api").LabTelemetryRun | null>(null);
+  const telemetryEnabled = telemetryStatus.data?.enabled === true;
+  const hostSamples = useLabHostTelemetry(telemetryEnabled);
   const inFlight = useRef(false);
   const pendingAttempt = useRef<Attempt | null>(null);
   const detail = useApi<SimulationRun>(selectedRun ? `/api/simulation/runs/${encodeURIComponent(selectedRun.execution_id)}` : null, {
@@ -36,6 +41,7 @@ export default function CyberDefensePage() {
     shouldRetryOnError: false,
   });
   const run = detail.data?.execution_id === selectedRun?.execution_id ? detail.data ?? null : selectedRun;
+  const currentTelemetry = run?.lab_telemetry ?? telemetryRun;
   const selected = selectedId || scenarios.data?.[0]?.scenario_id || "";
   const scenario = scenarios.data?.find((item) => item.scenario_id === selected);
   const runScenario = displayedScenario(run, scenarios.data);
@@ -64,9 +70,19 @@ export default function CyberDefensePage() {
     setBusy(true);
     setError(null);
     setSelectedRun(null);
+    setTelemetryRun(null);
     try {
+      if (telemetryEnabled) {
+        try {
+          setTelemetryRun(await api.startLabTelemetry(request.scenarioId, request.requestKey));
+        } catch {
+          // Telemetry is additive; a telemetry service failure must not alter
+          // the existing trusted simulation result.
+        }
+      }
       const result = await api.runSimulation(request.scenarioId, request.requestKey);
       setSelectedRun(result);
+      if (result.lab_telemetry) setTelemetryRun(result.lab_telemetry);
       pendingAttempt.current = null;
       setAttempt(null);
       if (offset !== 0) setOffset(0);
@@ -89,18 +105,32 @@ export default function CyberDefensePage() {
     void mutateStats();
   }
 
+  function selectStoredRun(item: SimulationRun) {
+    setSelectedRun(item);
+    setTelemetryRun(item.lab_telemetry ?? null);
+  }
+
   async function downloadReport(executionId: string) {
     await api.downloadExecutionReport(executionId);
+  }
+
+  async function downloadTelemetry(format: "json" | "zip" | "html") {
+    if (!currentTelemetry) return;
+    await api.downloadLabTelemetry(currentTelemetry.scenario_run_id, format);
   }
 
   return (
     <div className={styles.commandCenter}>
       <div className={styles.hero}>
         <p className={styles.eyebrow}><Crosshair size={14} aria-hidden="true" /> Sentivra / defense lab</p>
-        <PageHeader title="Cyber Defense Command Center" description="Simulate. Detect. Analyze. Defend. Trace trusted fixtures through your local security pipeline." actions={<Button variant="outline" onClick={() => setSelectedRun(null)} disabled={busy || !selectedRun}><RotateCcw /> Reset visualization</Button>} />
+        <PageHeader title="Cyber Defense Command Center" description="Simulate. Detect. Analyze. Defend. Trace trusted fixtures through your local security pipeline." actions={<Button variant="outline" onClick={() => { setSelectedRun(null); setTelemetryRun(null); }} disabled={busy || !selectedRun}><RotateCcw /> Reset visualization</Button>} />
       </div>
 
+      <ScenarioTelemetryStrip run={currentTelemetry} onDownload={downloadTelemetry} />
+
       <div role="note" className={styles.safetyNotice}><ShieldCheck size={20} aria-hidden="true" /><p>{SIMULATION_NOTICE}</p><span className={styles.marker}>SIMULATED EVENT</span></div>
+
+      <HostTelemetryPanel enabled={telemetryEnabled} samples={hostSamples} />
 
       <section aria-label="Simulation statistics" className={styles.statistics}>
         <div className={styles.sectionHeading}><h2>Simulation overview</h2><span className={styles.muted}>All stored executions · your account</span></div>
@@ -149,7 +179,7 @@ export default function CyberDefensePage() {
           {history.error ? <div className={styles.errorWithRetry}><ErrorState error={history.error} /><Button variant="outline" disabled={history.isValidating} onClick={() => void history.mutate()}>Retry history</Button></div> : null}
           {history.isLoading ? <LoadingBlock label="Loading execution history…" /> : null}
           {!history.isLoading && !history.error && !rows.length ? <EmptyState title={offset ? "No more executions" : "No simulations yet"}>{offset ? "Return to the previous page or refresh history." : "Your first recorded simulation will appear here."}</EmptyState> : null}
-          {rows.length ? <div className={styles.historyList}>{rows.map((item) => { const outcome = runOutcome(item); return <button type="button" key={item.execution_id} disabled={busy} className={styles.historyRow} aria-pressed={run?.execution_id === item.execution_id} onClick={() => setSelectedRun(item)}><span className={styles.historyIcon} data-tone={outcome.tone}><Activity size={17} aria-hidden="true" /></span><span className={styles.historyIdentity}><strong>{item.scenario?.name ?? scenarios.data?.find((entry) => entry.scenario_id === item.scenario_id)?.name ?? item.scenario_id}</strong><time dateTime={item.started_at} title={item.started_at}>{formatTimestamp(item.started_at)}</time><span className={styles.historyId}>{item.execution_id}</span></span><span className={styles.historyStatus}><span className={styles.badge} data-tone={outcome.tone}>{outcome.label}</span><span>{readable(item.status)} · {detectionLabel(item.detection_state)}</span><SourceTypeBadge sourceType={item.source_type} /><span className={styles.historyMarker}>SIMULATED EVENT</span></span><ArrowRight size={16} aria-hidden="true" /></button>; })}</div> : null}
+          {rows.length ? <div className={styles.historyList}>{rows.map((item) => { const outcome = runOutcome(item); return <button type="button" key={item.execution_id} disabled={busy} className={styles.historyRow} aria-pressed={run?.execution_id === item.execution_id} onClick={() => selectStoredRun(item)}><span className={styles.historyIcon} data-tone={outcome.tone}><Activity size={17} aria-hidden="true" /></span><span className={styles.historyIdentity}><strong>{item.scenario?.name ?? scenarios.data?.find((entry) => entry.scenario_id === item.scenario_id)?.name ?? item.scenario_id}</strong><time dateTime={item.started_at} title={item.started_at}>{formatTimestamp(item.started_at)}</time><span className={styles.historyId}>{item.execution_id}</span></span><span className={styles.historyStatus}><span className={styles.badge} data-tone={outcome.tone}>{outcome.label}</span><span>{readable(item.status)} · {detectionLabel(item.detection_state)}</span><SourceTypeBadge sourceType={item.source_type} /><span className={styles.historyMarker}>SIMULATED EVENT</span></span><ArrowRight size={16} aria-hidden="true" /></button>; })}</div> : null}
           <div className={styles.pagination}><span>{rows.length ? `${offset + 1}–${offset + rows.length}` : "0"} shown · Page {Math.floor(offset / HISTORY_PAGE_SIZE) + 1}</span><div><Button variant="outline" size="sm" disabled={busy || history.isLoading || offset === 0} onClick={() => setOffset(Math.max(0, offset - HISTORY_PAGE_SIZE))}><ArrowLeft /> Previous</Button><Button variant="outline" size="sm" disabled={busy || history.isLoading || Boolean(history.error) || (history.data?.length ?? 0) <= HISTORY_PAGE_SIZE} onClick={() => setOffset(offset + HISTORY_PAGE_SIZE)}>Next <ArrowRight /></Button></div></div>
         </CardContent>
       </Card>

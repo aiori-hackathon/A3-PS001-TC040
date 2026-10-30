@@ -41,6 +41,90 @@ can associate a ransomware finding with already-produced document, message, or
 network signals as a `ransomware_attack_chain` incident. It does not rewrite the
 source detector outputs.
 
+## Cyber Defense Lab telemetry
+
+Telemetry is separately opt-in through `SENTIVRA_LAB_TELEMETRY_ENABLED=true`.
+With the flag false, the existing Lab response and page behavior remain
+unchanged. With it true, the Lab opens an authenticated Server-Sent Events
+stream and the backend samples aggregate host counters only while a client is
+connected.
+
+```mermaid
+flowchart LR
+  H[Aggregate psutil counters] --> Q[Bounded in-memory ring]
+  Q --> SSE[SSE host stream]
+  M[Existing synchronous Mode A replay] --> R[In-memory scenario record]
+  Q --> R
+  R --> J[JSON export]
+  R --> Z[CSV files in ZIP]
+  R --> W[Offline HTML report]
+  R --> P[Lab pinned strip + event log]
+```
+
+### Collection and privacy
+
+The collector reports CPU percentage, memory percentage, disk read/write bytes
+per second, network sent/received bytes per second, process count, and thread
+count. It uses monotonic clocks for rate intervals and ISO timestamps for
+display. Samples are held in a bounded in-memory ring for approximately 15
+minutes and are not written to disk by the collector.
+
+No process names, command lines, usernames, file paths, hostnames, IP
+addresses, registry values, process contents, or file contents are collected,
+shown, or exported. If an operating-system counter is unavailable, the UI and
+exports use `n/a`/`null` rather than inventing a value.
+
+The measured benchmark in this worker was 0.305% process CPU over five
+one-second steady-state samples. One-time process/thread baseline setup took
+1.816 seconds, and the benchmarked sample allocation peak was 8,110 bytes.
+The process/thread count is refreshed less frequently than the other counters
+because Windows process enumeration is materially more expensive; the stream
+still publishes aggregate samples every second after the initial baseline.
+
+### Mode A scenario sources and stopping semantics
+
+Every telemetry-enabled run receives a `scenario_run_id` and ordered events
+with `t_offset_ms`, ISO timestamp, source, type, message, and numeric payload.
+The sources are:
+
+- `HOST`: real aggregate host samples from the read-only collector.
+- `SIMULATED`: the existing Mode A feature vector or synthetic scenario signal.
+- `SENTIVRA`: detector scores, threshold observations, detection, and fusion.
+- `MITIGATION`: dry-run mitigation and replay containment records.
+
+The event types are `scenario_started`, `stage_signal`, `ransomware_score`,
+`detection`, `fusion_incident`, `mitigation_triggered`,
+`containment_complete`, and `scenario_ended`.
+
+Mode A attack telemetry is simulated; the host was not touched. “Stopped” means
+the existing replay reached its detection boundary and the telemetry record
+logged the mitigation as dry-run. No host process is signaled, suspended,
+killed, or isolated. Time-to-detect, time-to-contain, replay samples before an
+alert, peak score, and peak host CPU/disk are included when available.
+
+Mode B is **Not enabled** and has no dummy-folder, path-guard, restore, or lab
+watcher implementation in this branch.
+
+### Exports and evidence
+
+The server generates exports from the in-memory run record without writing an
+export file: JSON contains metadata, timeline, host samples, and summary; CSV
+ZIP contains `host_samples.csv` and `timeline.csv` plus metadata/summary JSON;
+HTML is self-contained and opens offline. Metadata includes the run ID, Mode A
+type, app/model versions when available, thresholds, contributing sources, and
+the statement: **“Mode A replay: no real malware, host files not modified.”**
+
+The Mode A file/process/network safety evidence is recorded in
+[`docs/evidence/lab-mode-a-file-operations.json`](evidence/lab-mode-a-file-operations.json).
+It covers the test run's database-only simulation persistence and verifies no
+subprocess, process signal, outbound network call, or host file write was
+observed outside the existing test persistence boundary.
+
+Limitations: Mode A attack telemetry is simulated; host telemetry is aggregate-
+only; Mode B is not implemented; the collector's process/thread baseline is
+OS-dependent; and dataset-trained ransomware metrics do not transfer 1:1 to
+live hosts.
+
 ## Data and preprocessing
 
 Training uses the feature-selected MLRan split from

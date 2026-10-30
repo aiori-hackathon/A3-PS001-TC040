@@ -78,6 +78,47 @@ explanations, limitations, and citations are documented in
 training source; RanDe-W11 is methodology-only and does not provide a
 pretrained model.
 
+### Cyber Defense Lab telemetry (opt-in)
+
+Set `SENTIVRA_LAB_TELEMETRY_ENABLED=true` to add aggregate, read-only host
+telemetry to the Cyber Defense Lab. The Lab opens an authenticated SSE stream
+while its page is open; the sampler stops when the last stream disconnects.
+Mode B is **Not enabled** in this branch. Existing Mode A replay behavior is
+wrapped without converting the simulation pipeline to a thread.
+
+```mermaid
+flowchart LR
+  UI[Cyber Defense Lab] -->|authenticated SSE| S[Telemetry stream]
+  S --> C[psutil aggregate collector]
+  C --> R[15-minute in-memory ring]
+  UI -->|start / run| SIM[Existing Mode A simulation]
+  SIM --> T[Scenario telemetry record]
+  R --> T
+  T --> E[JSON / CSV ZIP / offline HTML export]
+  T --> UI
+```
+
+Collected values are total CPU percentage, memory percentage, disk read/write
+bytes per second, network sent/received bytes per second, process count, and
+thread count. No process names, command lines, usernames, paths, hostnames,
+IP addresses, file contents, or identifying host data are collected or
+exported. Mode A attack events are labeled `SIMULATED`; detector and fusion
+outputs are `SENTIVRA`; dry-run policy records are `MITIGATION`; host samples
+are `HOST`.
+
+Mode A telemetry reports the existing replay stopping at the detection
+boundary and records mitigation as dry-run. It never signals, suspends, kills,
+or isolates a host process. The measured steady-state collector benchmark in
+this environment was **0.305% process CPU over 5 one-second samples**, with
+**1.816 seconds** of one-time process/thread baseline setup and **8,110 bytes**
+of measured allocation for the benchmarked sample loop. These are environment-
+specific measurements, not universal performance guarantees.
+
+Each run can be downloaded as full JSON, a ZIP containing separate host and
+timeline CSV files, or a self-contained offline HTML report. Exports contain
+aggregate-only telemetry. The detailed design, source labels, safety evidence,
+and limitations are in [`docs/RANSOMWARE_DETECTION.md`](docs/RANSOMWARE_DETECTION.md).
+
 The dashboard’s Overview cards count alerts for all implemented detection domains. A value of `0` means the capability is available but no alert was raised in the selected time window; it does not mean the detector is missing. The **Models** page is narrower: it reports optional trained model artifacts only. “Not trained” there does not contradict an implemented rule/heuristic detector; it means no trained ML artifact is being claimed.
 
 ## Quick start
