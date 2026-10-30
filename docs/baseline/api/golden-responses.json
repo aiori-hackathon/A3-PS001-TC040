@@ -1,0 +1,454 @@
+{
+  "/api/simulation/scenarios": {
+    "body": [
+      {
+        "category": "Application security",
+        "description": "A harmless SQL-like request analyzed by local rules.",
+        "detector": "SQLInjectionDetector",
+        "detector_allowlist": [
+          "SQLInjectionDetector"
+        ],
+        "detector_availability": {
+          "detail": "Local detector is available",
+          "status": "Available"
+        },
+        "event_type": "sql_analysis",
+        "expected_outcome": "detected",
+        "limitation": "Rule and lexical analysis only; the local synthetic target uses no database.",
+        "name": "SQL injection indicator",
+        "scenario_id": "sqli-indicator",
+        "simulation_warning": "SIMULATED EVENT only; no real-world action can occur.",
+        "target_endpoint": "synthetic://search-target/search",
+        "version": "1.0"
+      },
+      {
+        "category": "AI security",
+        "description": "Untrusted text attempts to override instructions and request protected information.",
+        "detector": "PromptInjectionDetector",
+        "detector_allowlist": [
+          "PromptInjectionDetector"
+        ],
+        "detector_availability": {
+          "detail": "Local detector is available",
+          "status": "Available"
+        },
+        "event_type": "prompt_analysis",
+        "expected_outcome": "detected",
+        "limitation": "Heuristics identify suspicious instructions; no language model is called.",
+        "name": "Prompt injection indicator",
+        "scenario_id": "prompt-injection-indicator",
+        "simulation_warning": "SIMULATED EVENT only; no real-world action can occur.",
+        "target_endpoint": null,
+        "version": "1.0"
+      },
+      {
+        "category": "Network security",
+        "description": "A deterministic flow using reserved documentation-only IP addresses.",
+        "detector": "NetworkAnomalyDetector",
+        "detector_allowlist": [
+          "NetworkAnomalyDetector"
+        ],
+        "detector_availability": {
+          "detail": "Local detector is available",
+          "status": "Available"
+        },
+        "event_type": "network_flow",
+        "expected_outcome": "review",
+        "limitation": "Network models are experimental and trained on synthetic data.",
+        "name": "Synthetic network anomaly",
+        "scenario_id": "network-anomaly",
+        "simulation_warning": "SIMULATED EVENT only; no real-world action can occur.",
+        "target_endpoint": null,
+        "version": "1.0"
+      },
+      {
+        "category": "Web security",
+        "description": "A URL parsed locally for structural indicators.",
+        "detector": "URLDetector",
+        "detector_allowlist": [
+          "URLDetector"
+        ],
+        "detector_availability": {
+          "detail": "Local detector is available",
+          "status": "Available"
+        },
+        "event_type": "url_analysis",
+        "expected_outcome": "detected",
+        "limitation": "No DNS, HTTP request, redirect, or reputation lookup is performed.",
+        "name": "Suspicious URL",
+        "scenario_id": "suspicious-url",
+        "simulation_warning": "SIMULATED EVENT only; no real-world action can occur.",
+        "target_endpoint": null,
+        "version": "1.0"
+      },
+      {
+        "category": "File security",
+        "description": "Inert bytes with a file-signature/extension mismatch for static analysis.",
+        "detector": "MalwareDetector",
+        "detector_allowlist": [
+          "MalwareDetector"
+        ],
+        "detector_availability": {
+          "detail": "Local detector is available",
+          "status": "Available"
+        },
+        "event_type": "file_analysis",
+        "expected_outcome": "detected",
+        "limitation": "Only local metadata and heuristic analysis run; ClamAV and network scanners are excluded.",
+        "name": "Suspicious file indicator",
+        "scenario_id": "suspicious-file",
+        "simulation_warning": "SIMULATED EVENT only; no real-world action can occur.",
+        "target_endpoint": null,
+        "version": "1.1"
+      },
+      {
+        "category": "Control",
+        "description": "A normal synthetic search request sent through the same local target.",
+        "detector": "PromptInjectionDetector",
+        "detector_allowlist": [
+          "PromptInjectionDetector"
+        ],
+        "detector_availability": {
+          "detail": "Local detector is available",
+          "status": "Available"
+        },
+        "event_type": "text_analysis",
+        "expected_outcome": "allow",
+        "limitation": "A clean result is not a guarantee outside this fixture.",
+        "name": "Benign control event",
+        "scenario_id": "benign-control",
+        "simulation_warning": "SIMULATED EVENT only; no real-world action can occur.",
+        "target_endpoint": "synthetic://search-target/search",
+        "version": "1.0"
+      }
+    ],
+    "status_code": 200
+  },
+  "/api/v1/alerts?limit=2": {
+    "body": [],
+    "status_code": 200
+  },
+  "/api/v1/detectors": {
+    "body": [
+      {
+        "applicable_event_types": [
+          "file_analysis",
+          "file_created",
+          "file_downloaded"
+        ],
+        "availability": {
+          "detail": "Static heuristic analysis",
+          "engine_version": null,
+          "status": "Available"
+        },
+        "category": "malware",
+        "name": "MalwareDetector",
+        "version": "0.1.0"
+      },
+      {
+        "applicable_event_types": [
+          "file_analysis",
+          "file_created",
+          "file_downloaded"
+        ],
+        "availability": {
+          "detail": "Compiled rules from detection-rules/yara",
+          "engine_version": "4.5.4",
+          "status": "Available"
+        },
+        "category": "malware",
+        "name": "YaraDetector",
+        "version": "0.1.0"
+      },
+      {
+        "applicable_event_types": [
+          "file_analysis",
+          "file_created",
+          "file_downloaded"
+        ],
+        "availability": {
+          "detail": "clamd is not reachable \u2014 set SENTIVRA_CLAMD_SOCKET or SENTIVRA_CLAMD_HOST/SENTIVRA_CLAMD_PORT if ClamAV is installed",
+          "engine_version": null,
+          "status": "Not Configured"
+        },
+        "category": "malware",
+        "name": "ClamAVDetector",
+        "version": "0.1.0"
+      },
+      {
+        "applicable_event_types": [
+          "dns_event",
+          "network_flow"
+        ],
+        "availability": {
+          "detail": "statistical: Available, isolation_forest: Available, autoencoder: Available, classifier: Available, behavior_rules: Available",
+          "engine_version": null,
+          "status": "Available"
+        },
+        "category": "network_anomaly",
+        "name": "NetworkAnomalyDetector",
+        "version": "0.1.0"
+      },
+      {
+        "applicable_event_types": [
+          "authentication_event",
+          "endpoint_batch",
+          "file_created",
+          "file_modified",
+          "log_batch",
+          "persistence_item",
+          "process_network_connection",
+          "process_started",
+          "system_log"
+        ],
+        "availability": {
+          "detail": "8 Sigma rules loaded, 0 unsupported",
+          "engine_version": null,
+          "status": "Available"
+        },
+        "category": "sigma_rule",
+        "name": "SigmaDetector",
+        "version": "0.1.0"
+      },
+      {
+        "applicable_event_types": [
+          "authentication_event",
+          "endpoint_batch",
+          "log_batch",
+          "system_log"
+        ],
+        "availability": {
+          "detail": "4 authentication/log rules loaded",
+          "engine_version": null,
+          "status": "Available"
+        },
+        "category": "log_anomaly",
+        "name": "LogDetector",
+        "version": "0.1.0"
+      },
+      {
+        "applicable_event_types": [
+          "endpoint_batch",
+          "listening_port",
+          "persistence_item",
+          "process_started"
+        ],
+        "availability": {
+          "detail": "5 host rules; fleet baseline: Available (v0.1.0); no endpoint ML model in this version",
+          "engine_version": null,
+          "status": "Available"
+        },
+        "category": "behavioral_anomaly",
+        "name": "BehavioralAnomalyDetector",
+        "version": "0.1.0"
+      },
+      {
+        "applicable_event_types": [
+          "sql_analysis",
+          "text_analysis"
+        ],
+        "availability": {
+          "detail": "31 SQLi rules loaded",
+          "engine_version": null,
+          "status": "Available"
+        },
+        "category": "sql_injection",
+        "name": "SQLInjectionDetector",
+        "version": "0.1.0"
+      },
+      {
+        "applicable_event_types": [
+          "gmail_message",
+          "prompt_analysis",
+          "telegram_message",
+          "text_analysis",
+          "whatsapp_message"
+        ],
+        "availability": {
+          "detail": "Heuristic prompt-injection rules loaded",
+          "engine_version": null,
+          "status": "Available"
+        },
+        "category": "prompt_injection",
+        "name": "PromptInjectionDetector",
+        "version": "0.1.0"
+      },
+      {
+        "applicable_event_types": [
+          "browser_url",
+          "gmail_message",
+          "telegram_message",
+          "text_analysis",
+          "url_analysis",
+          "whatsapp_message"
+        ],
+        "availability": {
+          "detail": "Local URL parser and heuristic rules loaded",
+          "engine_version": null,
+          "status": "Available"
+        },
+        "category": "phishing",
+        "name": "URLDetector",
+        "version": "0.1.0"
+      }
+    ],
+    "status_code": 200
+  },
+  "/api/v1/health": {
+    "body": {
+      "database": "ok",
+      "engines": {
+        "BehavioralAnomalyDetector": {
+          "detail": "5 host rules; fleet baseline: Available (v0.1.0); no endpoint ML model in this version",
+          "engine_version": null,
+          "status": "Available"
+        },
+        "ClamAVDetector": {
+          "detail": "clamd is not reachable \u2014 set SENTIVRA_CLAMD_SOCKET or SENTIVRA_CLAMD_HOST/SENTIVRA_CLAMD_PORT if ClamAV is installed",
+          "engine_version": null,
+          "status": "Not Configured"
+        },
+        "LogDetector": {
+          "detail": "4 authentication/log rules loaded",
+          "engine_version": null,
+          "status": "Available"
+        },
+        "MalwareDetector": {
+          "detail": "Static heuristic analysis",
+          "engine_version": null,
+          "status": "Available"
+        },
+        "NetworkAnomalyDetector": {
+          "detail": "statistical: Available, isolation_forest: Available, autoencoder: Available, classifier: Available, behavior_rules: Available",
+          "engine_version": null,
+          "status": "Available"
+        },
+        "PromptInjectionDetector": {
+          "detail": "Heuristic prompt-injection rules loaded",
+          "engine_version": null,
+          "status": "Available"
+        },
+        "SQLInjectionDetector": {
+          "detail": "31 SQLi rules loaded",
+          "engine_version": null,
+          "status": "Available"
+        },
+        "SigmaDetector": {
+          "detail": "8 Sigma rules loaded, 0 unsupported",
+          "engine_version": null,
+          "status": "Available"
+        },
+        "Suricata": {
+          "detail": "Suricata integration is planned; see docs/architecture.md \u00a74",
+          "engine_version": null,
+          "status": "Not Configured"
+        },
+        "URLDetector": {
+          "detail": "Local URL parser and heuristic rules loaded",
+          "engine_version": null,
+          "status": "Available"
+        },
+        "YaraDetector": {
+          "detail": "Compiled rules from detection-rules/yara",
+          "engine_version": "4.5.4",
+          "status": "Available"
+        },
+        "Zeek": {
+          "detail": "Zeek integration is planned; see docs/architecture.md \u00a74",
+          "engine_version": null,
+          "status": "Not Configured"
+        }
+      },
+      "environment": "test",
+      "status": "ok"
+    },
+    "status_code": 200
+  },
+  "/api/v1/metrics?window_hours=24": {
+    "body": {
+      "generated_at": "2026-10-30T04:32:16.583234+00:00",
+      "note": "Counts of what Sentivra has seen. Model evaluation metrics are reported per model via GET /api/v1/models, each tied to a dataset and evaluation date.",
+      "security_score": {
+        "formula": "100 \u2212 (25 \u00d7 open CRITICAL + 10 \u00d7 open HIGH + 4 \u00d7 open MEDIUM + 1 \u00d7 open LOW), over alerts raised in the last 24 h, floored at 0",
+        "note": "A transparent heuristic over open alerts, not a probability and not a rating of the organization's overall security.",
+        "penalty": 0,
+        "value": 100
+      },
+      "totals": {
+        "alerts": 0,
+        "events": 0
+      },
+      "window": {
+        "alert_quality": {
+          "denominator_note": "Reviewed-alert false share uses reviewed alerts only; it is not a ground-truth false-positive rate.",
+          "dispositions": {},
+          "generated": 0,
+          "pending_review": 0,
+          "reviewed": 0,
+          "reviewed_false_share": null
+        },
+        "alerts": 0,
+        "by_classification": {},
+        "by_detector": {},
+        "by_domain": {
+          "endpoint": 0,
+          "files": 0,
+          "network": 0,
+          "prompts": 0,
+          "sql": 0,
+          "urls": 0
+        },
+        "by_severity": {
+          "CRITICAL": 0,
+          "HIGH": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "SAFE": 0
+        },
+        "by_source_type": {},
+        "by_status": {},
+        "open_alerts": 0,
+        "open_by_severity": {
+          "CRITICAL": 0,
+          "HIGH": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "SAFE": 0
+        },
+        "simulation_alerts_excluded": 0,
+        "timeline": {
+          "bucket": "hour",
+          "counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "start": "2026-10-29T04:32:16.583234+00:00"
+        }
+      },
+      "window_hours": 24
+    },
+    "status_code": 200
+  }
+}
