@@ -33,6 +33,8 @@ from app.events.schema import (
     SourceType,
 )
 from app.models.simulation import SimulationExecutionORM
+from app.ransomware.fusion import correlate_ransomware
+from app.ransomware.model import RansomwareModelUnavailable, load_held_out_replay_vector
 from app.risk.engine import RiskEngine
 from app.schemas.detection import (
     AnalysisStatus,
@@ -69,6 +71,7 @@ class Scenario:
     expected_outcome: str
     limitation: str
     target_endpoint: str | None = None
+    context_signals: tuple[dict[str, Any], ...] = ()
 
 
 # This is the trust boundary.  Adding a scenario must explicitly name every
@@ -110,6 +113,22 @@ SCENARIOS = (
         "A normal synthetic search request sent through the same local target.", "PromptInjectionDetector",
         ("PromptInjectionDetector",), SecurityEventType.TEXT_ANALYSIS, "1.0", "allow",
         "A clean result is not a guarantee outside this fixture.", "synthetic://search-target/search",
+    ),
+    Scenario(
+        "ransomware-replay", "MLRan ransomware behavior replay", "Endpoint security",
+        "A fixed held-out MLRan behavioral vector is replayed through the opt-in ransomware detector.",
+        "RansomwareBehaviorDetector", ("RansomwareBehaviorDetector",), SecurityEventType.ENDPOINT_BATCH,
+        "1.0", "detected", "Dataset replay only; no file, registry, process, network, or host operation is performed.",
+    ),
+    Scenario(
+        "ransomware-attack-chain", "Ransomware attack-chain replay", "Correlated defense",
+        "A held-out ransomware behavior vector is correlated with trusted synthetic document, message, and network signals.",
+        "RansomwareBehaviorDetector", ("RansomwareBehaviorDetector",), SecurityEventType.ENDPOINT_BATCH,
+        "1.0", "detected", "Correlation is read-only and dry-run; no host or network mitigation is executed.",
+        None,
+        ({"source": "document-detector", "severity": "HIGH", "signal": "suspicious_document"},
+         {"source": "message-detector", "severity": "MEDIUM", "signal": "phishing_message"},
+         {"source": "network-detector", "severity": "MEDIUM", "signal": "suspicious_network"}),
     ),
 )
 SCENARIO_MAP = {s.scenario_id: s for s in SCENARIOS}
@@ -160,6 +179,17 @@ def _fixture(scenario: Scenario) -> SecurityEvent:
         return SecurityEvent(
             event_type=scenario.event_type, source="cyber-defense-lab", source_type=SourceType.SIMULATED,
             content=EventContent(body=text), metadata={**common, "analysis_text": text},
+        )
+    if scenario.scenario_id in {"ransomware-replay", "ransomware-attack-chain"}:
+        try:
+            features = load_held_out_replay_vector(ransomware=True)
+        except RansomwareModelUnavailable:
+            features = {}
+        return SecurityEvent(
+            event_type=SecurityEventType.ENDPOINT_BATCH, source="cyber-defense-lab",
+            source_type=SourceType.SIMULATED,
+            metadata={**common, "ransomware_features": features, "replay_mode": "MLRan_held_out_test",
+                      "correlation_signals": list(scenario.context_signals)},
         )
     if scenario.scenario_id == "network-anomaly":
         return SecurityEvent(
@@ -513,6 +543,17 @@ async def _execute(
             timeout=SIMULATION_TIMEOUT_SECONDS,
         )
         errors = assessment.analysis_errors
+        ransomware_result = next((result for result in detector_results if result.detector == "RansomwareBehaviorDetector"), None)
+        fusion_incident = correlate_ransomware(ransomware_result, list(scenario.context_signals))
+        if fusion_incident:
+            audit_service.record(
+                db,
+                actor=actor,
+                action="ransomware_fusion_dry_run",
+                resource=f"event:{event.event_id}",
+                detail={"classification": fusion_incident["classification"], "signal_count": fusion_incident["signal_count"], "real_world_action_taken": False},
+                commit=False,
+            )
         complete_results = [result for result in detector_results if result.status in {
             FindingStatus.SUSPICIOUS, FindingStatus.NO_FINDING_OBSERVED,
         }]
@@ -539,6 +580,7 @@ async def _execute(
             "enforcement": {"decision": decision, "reason": reason, "mode": "simulation",
                             "real_world_action_taken": False},
             "errors": errors, "timeline": timeline,
+            "fusion_incident": fusion_incident,
         })
         db.commit()
         return row
@@ -660,7 +702,7 @@ def statistics(db: Session, actor: str | None = None) -> dict[str, Any]:
         func.sum(case((SimulationExecutionORM.status == "FAILED", 1), else_=0)).label("failed"),
         func.sum(case((SimulationExecutionORM.status == "RUNNING", 1), else_=0)).label("running"),
         func.sum(case((SimulationExecutionORM.detection_state == "DETECTED", 1), else_=0)).label("detected"),
-        func.sum(case((SimulationExecutionORM.enforcement_decision == "SIMULATED_BLOCK", 1), else_=0)).label("blocks"),
+        func.sum(case((SimulationExecutionORM.enforcement_decision.in_(("SIMULATED_BLOCK", "BLOCKED")), 1), else_=0)).label("blocks"),
     ).where(base)).one()
 
     grouped = db.execute(select(

@@ -71,7 +71,13 @@ class Settings(BaseSettings):
     def is_development(self) -> bool:
         return self.env.lower() in ("development", "dev", "test")
 
-    @field_validator("yara_rules_dir", "models_dir", "rules_dir", "state_dir", mode="after")
+    # Ransomware scoring is deliberately opt-in. With the flag off the
+    # detector is not registered and the existing application surface is
+    # unchanged.
+    ransomware_model_enabled: bool = False
+    ransomware_model_dir: Path = REPO_ROOT / "models" / "ransomware" / "mlran"
+
+    @field_validator("yara_rules_dir", "models_dir", "rules_dir", "state_dir", "ransomware_model_dir", mode="after")
     @classmethod
     def _resolve_against_repo(cls, value: Path) -> Path:
         """Relative directories in .env mean "relative to the repo", not to

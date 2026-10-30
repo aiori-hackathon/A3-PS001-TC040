@@ -1,38 +1,43 @@
-import { Clock3, Fingerprint, ListChecks, ShieldAlert } from "lucide-react";
+import { Clock3, Download, Eye, Fingerprint, ListChecks, ShieldAlert, ShieldCheck, ShieldX } from "lucide-react";
 
-import { SeverityBadge, SourceTypeBadge } from "@/components/sentivra/badges";
+import { SeverityBadge } from "@/components/sentivra/badges";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { detectionLabel, displayedScenario, durationMs, formatDuration, formatTimestamp, readable, runOutcome, timelineElapsed } from "@/lib/simulation";
 import type { SimulationRun, SimulationScenario } from "@/types/api";
 import styles from "./command-center.module.css";
 
-export function RunDetails({ run, scenarios }: { run: SimulationRun; scenarios: SimulationScenario[] }) {
+export function RunDetails({ run, scenarios, onDownload }: { run: SimulationRun; scenarios: SimulationScenario[]; onDownload: () => void }) {
   const outcome = runOutcome(run);
   const scenario = displayedScenario(run, scenarios)!;
   const results = run.detector_results?.length ? run.detector_results : run.findings ?? [];
   const evidenceCount = results.reduce((total, result) => total + result.evidence.length, 0);
+  const topEvidence = results.flatMap((result) => result.evidence.map((evidence) => ({ detector: result.detector, detail: evidence.detail }))).slice(0, 3);
   const errors = [...new Set([...(run.errors ?? []), ...(run.error ? [run.error] : [])])];
   const timeline = run.timeline ?? [];
+  const VerdictIcon = outcome.kind === "block" ? ShieldX : outcome.kind === "allow" ? ShieldCheck : outcome.kind === "review" ? Eye : ShieldAlert;
 
   return (
     <section className={styles.report} aria-label="Selected execution report">
       <Card className={styles.resultCard} data-tone={outcome.tone}>
         <CardHeader>
-          <div className={styles.sectionHeading}><div><p className={styles.eyebrow}>Selected execution</p><h2>{scenario.name}</h2></div><div><SourceTypeBadge sourceType={run.source_type} /><span className={styles.marker}>SIMULATED EVENT</span></div></div>
+          <div className={styles.sectionHeading}><div><p className={styles.eyebrow}>Simulation result</p><h2>{scenario.name}</h2></div></div>
           <p className={styles.executionId}><Fingerprint size={14} aria-hidden="true" />{run.execution_id}</p>
         </CardHeader>
         <CardContent className={styles.resultBody}>
-          <div className={styles.verdict}><ShieldAlert size={22} aria-hidden="true" /><div><h3>{outcome.label}</h3><p>{outcome.explanation}</p></div></div>
+          <div className={styles.verdict}><VerdictIcon size={34} aria-hidden="true" /><div><h3>{outcome.label}</h3><p>{outcome.explanation}</p><Button variant="outline" size="sm" onClick={onDownload}><Download /> Download report (.md)</Button></div></div>
+          <div className={styles.keyEvidence}><strong>Key evidence</strong>{topEvidence.length ? <ul>{topEvidence.map((item, index) => <li key={`${item.detector}-${index}`}><span>{item.detector}</span>{item.detail}</li>)}</ul> : <p>No evidence items were recorded. That does not establish safety outside this fixture.</p>}</div>
            <dl className={styles.resultMetrics}>
             <div><dt>Execution</dt><dd>{readable(run.status)}</dd></div>
             <div><dt>Detection</dt><dd>{detectionLabel(run.detection_state)}</dd></div>
             <div><dt>Risk assessment</dt><dd>{run.risk_assessment ? <><SeverityBadge severity={run.risk_assessment.severity} /><span>{run.risk_assessment.risk_score}/100</span></> : "Not recorded"}</dd></div>
              <div><dt>Recorded duration</dt><dd>{formatDuration(durationMs(run))}</dd></div>
            </dl>
-            {run.target ? <div className={styles.policyExplanation}><strong>Local target request</strong><p>{run.target.endpoint}</p><p>HTTP {run.target.status_code} · Target outcome: {readable(run.target.target_execution_state)} · Protected operation: {run.target.protected_operation_executed ? "EXECUTED" : "NOT EXECUTED"}</p><pre className={styles.targetResponse}>{JSON.stringify(run.target.response, null, 2)}</pre></div> : null}
+           {run.target ? <div className={styles.policyExplanation}><strong>Local target request</strong><p>{run.target.endpoint}</p><p>HTTP {run.target.status_code} · Target outcome: {readable(run.target.target_execution_state)} · Protected operation: {run.target.protected_operation_executed ? "EXECUTED" : "NOT EXECUTED"}</p><pre className={styles.targetResponse}>{JSON.stringify(run.target.response, null, 2)}</pre></div> : null}
+           {run.fusion_incident ? <div className={styles.fusionIncident}><strong>Correlated attack-chain incident</strong><p>{readable(run.fusion_incident.classification)} · {run.fusion_incident.signal_count} supporting signal{run.fusion_incident.signal_count === 1 ? "" : "s"}</p><p className={styles.muted}>Dry-run mitigation: {run.fusion_incident.mitigation.actions.join(", ")}. Real-world action: none.</p></div> : null}
           <div className={styles.policyExplanation}><strong>Policy explanation</strong><p>{run.enforcement?.reason ?? "No policy explanation was recorded."}</p><p className={styles.muted}>Recorded decision: {readable(run.enforcement_decision)} · Real-world action: {run.enforcement?.real_world_action_taken === false ? "none" : run.enforcement?.real_world_action_taken ? "unexpected action reported" : "not recorded"}</p></div>
           {errors.length ? <div role="status" className={styles.analysisErrors}><strong>Analysis limitations / errors</strong><ul>{errors.map((error) => <li key={error}>{error}</li>)}</ul></div> : null}
-          <p className={styles.muted}>{scenario.limitation}</p>
+          <details className={styles.technicalDetails}><summary>Show technical details</summary><p className={styles.muted}>{scenario.limitation}</p><p className={styles.muted}>Execution ID: <code>{run.execution_id}</code> · Event: <code>{run.event_id ?? "not persisted"}</code> · Alert: <code>{run.alert_id ?? "none"}</code></p></details>
         </CardContent>
       </Card>
 

@@ -23,7 +23,7 @@ from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app.api import alerts, audit, events, metrics, simulation
+from app.api import alerts, audit, cyber_defense, events, metrics, simulation
 from app.api.deps import get_db, get_detector_registry
 from app.core.database import Base
 from app.detectors.base import AvailabilityStatus, DetectorAvailability
@@ -45,10 +45,11 @@ from app.services.alert_repository import AlertRepository
 from app.services.event_repository import EventRepository
 from app.services.local_target import synthetic_search_target
 
-REQUIRED = {
+CORE_REQUIRED = {
     "sqli-indicator", "prompt-injection-indicator", "network-anomaly",
     "suspicious-url", "suspicious-file", "benign-control",
 }
+REQUIRED = CORE_REQUIRED | {"ransomware-replay", "ransomware-attack-chain"}
 
 
 @pytest.fixture()
@@ -74,7 +75,7 @@ def registry():
 @pytest.fixture()
 def lab(local_db, registry, monkeypatch):
     app = FastAPI()
-    for router in (simulation.router, alerts.router, events.router, metrics.router, audit.router):
+    for router in (simulation.router, cyber_defense.router, alerts.router, events.router, metrics.router, audit.router):
         app.include_router(router)
     app.dependency_overrides[get_db] = lambda: local_db
     app.dependency_overrides[get_detector_registry] = lambda: registry
@@ -95,6 +96,33 @@ def run(client, scenario="sqli-indicator", key=None):
     if key is not None:
         payload["request_key"] = key
     return client.post("/api/simulation/run", json=payload)
+
+
+def test_execution_report_requires_auth_and_has_safe_markdown(lab):
+    client, _ = lab
+    body = run(client).json()
+    report = client.get(f"/api/v1/cyber-defense/executions/{body['execution_id']}/report.md")
+    assert report.status_code == 200
+    assert report.headers["content-type"].startswith("text/markdown")
+    assert "attachment" in report.headers["content-disposition"]
+    assert f"sentivra-report-sqli-indicator-{body['execution_id'][:8]}-" in report.headers["content-disposition"]
+    text = report.text
+    for section in ("## Summary", "## Input", "## Detection", "## Policy decision", "## Standards exercised", "## Timeline", "## Limitations & honesty note", "## Reproduce"):
+        assert section in text
+    assert "secret" not in text.lower()
+    client.headers.pop("Authorization")
+    assert client.get(f"/api/v1/cyber-defense/executions/{body['execution_id']}/report.md").status_code == 401
+
+
+def test_execution_report_unknown_and_filtered_cap(lab):
+    client, _ = lab
+    assert client.get(f"/api/v1/cyber-defense/executions/{uuid.uuid4()}/report.md").status_code == 404
+    for index in range(3):
+        run(client, "benign-control", key=f"report-{index}")
+    response = client.get("/api/v1/cyber-defense/executions/report.md?verdict=ALLOWED")
+    assert response.status_code == 200
+    assert "at most 200" in response.text
+    assert "SENTIVRA Execution Report" in response.text
 
 
 def test_scenario_registry_is_trusted_and_complete(lab):
@@ -126,6 +154,16 @@ def test_unknown_scenario_and_bounded_history(lab):
         assert client.get(f"/api/simulation/runs?{query}").status_code == 422
 
 
+@pytest.mark.parametrize("scenario_id", ["ransomware-replay", "ransomware-attack-chain"])
+def test_ransomware_scenarios_fail_closed_when_opt_in_model_is_not_registered(lab, scenario_id):
+    client, _ = lab
+    result = run(client, scenario_id).json()
+    assert result["status"] == "FAILED"
+    assert result["detection_state"] == "DETECTOR_UNAVAILABLE"
+    assert result["enforcement_decision"] == "SIMULATED_UNAVAILABLE"
+    assert result["enforcement"]["real_world_action_taken"] is False
+
+
 def test_sql_attack_is_rejected_before_protected_operation_and_benign_control_executes(lab):
     client, _ = lab
     synthetic_search_target.reset()
@@ -147,6 +185,7 @@ def test_sql_attack_is_rejected_before_protected_operation_and_benign_control_ex
     benign_stages = [item["stage"] for item in benign["timeline"]]
     assert benign_stages.index("target_handler_entered") < benign_stages.index("protected_operation_entered") < benign_stages.index("protected_operation_completed") < benign_stages.index("target_response")
     assert synthetic_search_target.protected_operation_count == 1
+    assert client.get("/api/simulation/stats").json()["totals"]["blocks"] == 1
 
 
 def test_target_reset_does_not_delete_simulation_history(lab):
@@ -158,7 +197,7 @@ def test_target_reset_does_not_delete_simulation_history(lab):
     assert len(client.get("/api/simulation/runs").json()) == before
 
 
-@pytest.mark.parametrize("scenario_id", sorted(REQUIRED))
+@pytest.mark.parametrize("scenario_id", sorted(CORE_REQUIRED))
 def test_six_real_detector_fixtures_persist_and_match_risk_engine(lab, local_db, registry, scenario_id):
     client, _ = lab
     result = run(client, scenario_id)

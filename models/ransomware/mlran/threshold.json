@@ -1,0 +1,15 @@
+{
+  "threshold": 0.6851080536247732,
+  "target_recall": 0.98,
+  "validation_metrics": {
+    "threshold": 0.6851080536247732,
+    "accuracy": 0.9889884763124199,
+    "balanced_accuracy": 0.9886098407191295,
+    "precision": 0.9967284623773174,
+    "recall": 0.9801608579088472,
+    "f1": 0.988375236550419,
+    "roc_auc": 0.9993436892183146,
+    "false_positive_rate": 0.0029411764705882353
+  },
+  "met_target": true
+}

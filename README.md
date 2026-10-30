@@ -53,6 +53,31 @@ The current build exposes these working detection paths in the API and dashboard
 | Automated containment/remediation | ⏳ Not implemented | Approval-gated automation remains design-only |
 | Native endpoint agent | ⏳ Not implemented | Use osquery/Wazuh ingestion in this build |
 
+### Ransomware behavioral detection (opt-in)
+
+Sentivra includes an additive, opt-in MLRan behavioral ransomware detector.
+It consumes 483-feature endpoint behavior vectors and works alongside the
+existing network, message, document/file, prompt, URL, SQL, and endpoint
+detectors through the shared risk/alert pipeline. The correlation layer can
+associate a ransomware signal with suspicious activity from those other
+surfaces, including ransomware hidden behind a document, message, or network
+attack chain.
+
+Enable it with `SENTIVRA_RANSOMWARE_MODEL_ENABLED=true` after generating the
+verified artifacts with the training command in
+[`docs/RANSOMWARE_DETECTION.md`](docs/RANSOMWARE_DETECTION.md). The Cyber
+Defense Lab provides a host-safe held-out MLRan replay and an attack-chain
+replay. These simulations read behavioral vectors only: they do not execute
+malware, touch user files, modify the registry, launch processes, use the
+network, or perform OS-level mitigation. Mitigation output is dry-run and
+logged as an intention.
+
+Measured training, group-held-out validation, untouched test results, SHAP
+explanations, limitations, and citations are documented in
+[`docs/RANSOMWARE_DETECTION.md`](docs/RANSOMWARE_DETECTION.md). MLRan is the
+training source; RanDe-W11 is methodology-only and does not provide a
+pretrained model.
+
 The dashboard’s Overview cards count alerts for all implemented detection domains. A value of `0` means the capability is available but no alert was raised in the selected time window; it does not mean the detector is missing. The **Models** page is narrower: it reports optional trained model artifacts only. “Not trained” there does not contradict an implemented rule/heuristic detector; it means no trained ML artifact is being claimed.
 
 ## Quick start

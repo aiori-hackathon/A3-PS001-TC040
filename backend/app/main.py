@@ -19,6 +19,7 @@ from app.api import (
     analyze,
     audit,
     auth,
+    cyber_defense,
     detectors,
     endpoint,
     events,
@@ -28,6 +29,7 @@ from app.api import (
     metrics,
     models,
     network,
+    ransomware,
     rules,
     simulation,
     webhooks,
@@ -41,6 +43,7 @@ from app.detectors.malware_detector import MalwareDetector
 from app.detectors.network.suite import get_suite
 from app.detectors.network_anomaly_detector import NetworkAnomalyDetector
 from app.detectors.prompt_detector import PromptInjectionDetector
+from app.detectors.ransomware_detector import RansomwareDetector
 from app.detectors.registry import registry as detector_registry
 from app.detectors.sigma_detector import SigmaDetector
 from app.detectors.sqli_detector import SQLInjectionDetector
@@ -65,9 +68,12 @@ def _register_detectors() -> None:
     # instances against the same module-level app trigger startup more
     # than once, and re-registering must not raise.
     detector_registry.clear()
-    for detector in (MalwareDetector(), YaraDetector(), ClamAVDetector(), NetworkAnomalyDetector(),
-                     SigmaDetector(), LogDetector(), BehavioralAnomalyDetector(),
-                     SQLInjectionDetector(), PromptInjectionDetector(), URLDetector()):
+    detectors = [MalwareDetector(), YaraDetector(), ClamAVDetector(), NetworkAnomalyDetector(),
+                 SigmaDetector(), LogDetector(), BehavioralAnomalyDetector(),
+                 SQLInjectionDetector(), PromptInjectionDetector(), URLDetector()]
+    if get_settings().ransomware_model_enabled:
+        detectors.append(RansomwareDetector())
+    for detector in detectors:
         detector_registry.register(detector)
     # Load (and SHA-256-verify) the network models now rather than on the
     # first request, so /health reports their real state immediately.
@@ -133,7 +139,9 @@ def create_app() -> FastAPI:
     app.include_router(audit.router)
     app.include_router(integrations.router)
     app.include_router(webhooks.router)
+    app.include_router(ransomware.router)
     app.include_router(simulation.router)
+    app.include_router(cyber_defense.router)
 
     return app
 

@@ -141,6 +141,13 @@ export interface SimulationScenario {
   simulation_warning: string;
 }
 
+export interface RansomwareHealth {
+  enabled: boolean;
+  status: string;
+  detail: string;
+  engine_version?: string | null;
+}
+
 export interface SimulationRun {
   execution_id: string;
   scenario_id: string;
@@ -166,6 +173,7 @@ export interface SimulationRun {
   enforcement?: { decision: string; reason: string; mode: string; real_world_action_taken: boolean };
   scenario?: { id: string; name: string; limitation: string };
   target?: { endpoint: string; status_code: number; response: Record<string, unknown>; protected_operation_executed: boolean; target_execution_state: string; request_id: string };
+  fusion_incident?: { incident_id: string; classification: string; ransomware_detector: string; supporting_signals: Record<string, unknown>[]; signal_count: number; mitigation: { mode: string; actions: string[]; real_world_action_taken: boolean } } | null;
 }
 
 export interface SimulationStats {

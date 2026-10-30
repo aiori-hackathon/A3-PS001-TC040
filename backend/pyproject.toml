@@ -58,6 +58,10 @@ research = [
     "pandas>=2.2",
     "skl2onnx>=1.17",      # export scikit-learn models to ONNX
     "onnx>=1.16",
+    "xgboost>=2.1",        # ransomware benchmark candidate
+    "optuna>=3.6",         # bounded hyperparameter search
+    "shap>=0.46",          # behavioral feature explanations
+    "matplotlib>=3.8",     # reproducible training figures
 ]
 
 [tool.setuptools.packages.find]

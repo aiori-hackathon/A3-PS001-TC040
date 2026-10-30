@@ -1,0 +1,29 @@
+{
+  "model_version": "mlran-ransomware-1.0.0",
+  "model_id": "mlran-ransomware-binary",
+  "training_seed": 20261030,
+  "selected_model": "LogisticRegression",
+  "feature_count": 483,
+  "train_rows": 3905,
+  "test_rows": 975,
+  "source_hashes": {
+    "MLRan_X_train_RFE.csv": "aaf75d5754aac247b93e2a7d0baa449ccb3eacc08117f50dfa0fb422aff3db1f",
+    "MLRan_X_test_RFE.csv": "792e7bea9ccfe8bb056a05bc4751ebf18311c55e548d1b80910214c052ee8e16",
+    "MLRan_labels.csv": "1e00f2e11e02a34859e8863808422933988c151e8c821a88247798b051227e4f"
+  },
+  "shap_status": "available",
+  "leakage_audit": {
+    "label_columns_excluded": [
+      "family_label",
+      "sample_type",
+      "type_label"
+    ],
+    "feature_name_keyword_hits": [],
+    "feature_value_keyword_hits": [],
+    "exact_duplicate_rows": 901,
+    "near_duplicate_rows_rounded_6dp": 901,
+    "action": "No rows were silently removed; duplicate counts are reported for review."
+  },
+  "dataset": "MLRan feature-selected RFE split from faithfulco/mlran",
+  "methodology_reference": "RanDe-W11 preprocessing and leakage-audit methodology; no RanDe model used."
+}
