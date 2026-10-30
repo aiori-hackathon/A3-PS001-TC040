@@ -4,6 +4,7 @@ import csv
 from pathlib import Path
 from types import SimpleNamespace
 
+from app.core.config import get_settings
 from app.ransomware.fusion import correlate_ransomware
 from app.ransomware.model import RansomwareModel
 from app.schemas.detection import (
@@ -44,8 +45,13 @@ def test_safe_ransomware_result_does_not_create_incident():
     assert correlate_ransomware(safe, [{"source": "document-detector", "severity": "HIGH"}]) is None
 
 
-def test_model_is_disabled_by_default():
-    assert RansomwareModel().availability()["status"] == "Not Configured"
+def test_model_is_disabled_when_flag_is_false(monkeypatch):
+    monkeypatch.setenv("SENTIVRA_RANSOMWARE_MODEL_ENABLED", "false")
+    get_settings.cache_clear()
+    try:
+        assert RansomwareModel().availability()["status"] == "Not Configured"
+    finally:
+        get_settings.cache_clear()
 
 
 def test_trained_model_scores_a_behavioral_vector(monkeypatch):

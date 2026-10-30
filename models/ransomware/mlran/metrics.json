@@ -63,7 +63,7 @@
         }
       ],
       "group_count": 68,
-      "training_seconds": 5.090689300035592
+      "training_seconds": 4.361935599998105
     },
     "LightGBM": {
       "accuracy": 0.9851027920491718,
@@ -126,7 +126,7 @@
         }
       ],
       "group_count": 68,
-      "training_seconds": 3.2611540000070818
+      "training_seconds": 3.0124732999829575
     },
     "RandomForest": {
       "accuracy": 0.9866787447805658,
@@ -189,7 +189,7 @@
         }
       ],
       "group_count": 68,
-      "training_seconds": 4.74959870002931
+      "training_seconds": 5.144371200003661
     },
     "ExtraTrees": {
       "accuracy": 0.9874705983448312,
@@ -252,7 +252,7 @@
         }
       ],
       "group_count": 68,
-      "training_seconds": 6.681445599999279
+      "training_seconds": 5.817589499987662
     },
     "LogisticRegression": {
       "accuracy": 0.9899929202148507,
@@ -315,7 +315,7 @@
         }
       ],
       "group_count": 68,
-      "training_seconds": 0.9086144000175409
+      "training_seconds": 1.0052030999795534
     }
   },
   "threshold_selection": {

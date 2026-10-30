@@ -314,8 +314,14 @@ def main() -> None:
     (args.output_dir / "shap_global.json").write_text(json.dumps(feature_importance, indent=2), encoding="utf-8")
     data_files = [args.data_dir / name for name in ["MLRan_X_train_RFE.csv", "MLRan_X_test_RFE.csv", "MLRan_labels.csv"]]
     metadata = {
+        "name": "MLRan ransomware behavioral detector",
+        "domain": "ransomware",
         "model_version": "mlran-ransomware-1.0.0",
+        "version": "mlran-ransomware-1.0.0",
         "model_id": "mlran-ransomware-binary",
+        "artifact_filename": "model.joblib",
+        "artifact_format": "joblib",
+        "sha256": sha256(args.output_dir / "model.joblib") if (args.output_dir / "model.joblib").is_file() else "generated-after-save",
         "training_seed": args.seed,
         "selected_model": selected,
         "feature_count": len(features),
@@ -325,6 +331,21 @@ def main() -> None:
         "shap_status": shap_status,
         "leakage_audit": audit,
         "dataset": "MLRan feature-selected RFE split from faithfulco/mlran",
+        "training_dataset": "MLRan feature-selected RFE split (4,880 behavioral rows)",
+        "datasets": [
+            {"name": "MLRan", "role": "train/test", "license": "MIT", "source": "https://github.com/faithfulco/mlran", "notes": "Feature-selected 483-feature split; raw malware is not used."},
+        ],
+        "splits": {"train": len(train), "test": len(test)},
+        "split_method": "MLRan supplied split with family-grouped five-fold validation",
+        "preprocessing": {"numeric_features": len(features), "imputation": "median", "leakage_audit": "RanDe-inspired name/value audit"},
+        "feature_schema": features,
+        "threshold": threshold_info["threshold"],
+        "threshold_policy": "Out-of-fold threshold selected for target recall >= 0.98",
+        "calibration": {"method": "sigmoid", "cv": 3},
+        "evaluation_metrics": {key: float(value) for key, value in test_metrics.items() if key != "threshold"},
+        "evaluation": {"candidate_models": candidate_results, "threshold_selection": threshold_info, "held_out_test": test_metrics},
+        "evaluation_date": __import__("datetime").date.today().isoformat(),
+        "limitations": ["MLRan-derived metrics do not transfer 1:1 to live hosts.", "No OS-level isolation or automated host mitigation is implemented."],
         "methodology_reference": "RanDe-W11 preprocessing and leakage-audit methodology; no RanDe model used.",
     }
     (args.output_dir / "metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
